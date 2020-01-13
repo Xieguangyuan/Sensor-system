@@ -1,7 +1,9 @@
-const { app, BrowserWindow } = require('electron')
+const {
+  app,
+  BrowserWindow
+} = require('electron')
 
-function createWindow () {   
-  // 创建浏览器窗口
+function createWindow() {
   let win = new BrowserWindow({
     width: 800,
     height: 600,
@@ -9,9 +11,7 @@ function createWindow () {
       nodeIntegration: true
     }
   })
-
-  // 加载index.html文件
-  win.loadFile('index.html')
+  win.loadFile('SRC/HTML/index.html')
 }
 
 app.on('ready', createWindow)
