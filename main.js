@@ -11,7 +11,7 @@ function createWindow() {
       nodeIntegration: true
     }
   })
-  win.loadFile('index.html')
+  win.loadFile('SRC/HTML/index.html')
 }
 
 app.on('ready', createWindow)
