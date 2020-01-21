@@ -1,17 +1,13 @@
-const {
-  app,
-  BrowserWindow
-} = require('electron')
+var ElectronMain = require("electron");
 
 function createWindow() {
-  let win = new BrowserWindow({
-    width: 800,
-    height: 600,
-    webPreferences: {
-      nodeIntegration: true
-    }
-  })
-  win.loadFile('SRC/HTML/index.html')
+    var win = new ElectronMain.BrowserWindow({
+        width: 800,
+        height: 600,
+        webPreferences: {
+            nodeIntegration: true
+        }
+    });
+    win.loadFile('SRC/HTML/index.html');
 }
-
-app.on('ready', createWindow)
+ElectronMain.app.on('ready', createWindow);

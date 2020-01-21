@@ -5,6 +5,7 @@
     ],
     "compilerOptions": {
         "allowJs": true,
+        "module": "commonjs",
         "outDir": "./Comped"
     }
 }
