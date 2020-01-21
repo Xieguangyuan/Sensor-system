@@ -1,0 +1,10 @@
+{
+    "compileOnSave": true,
+    "files": [
+        "./MainParts/MainPart.ts"
+    ],
+    "compilerOptions": {
+        "allowJs": true,
+        "outDir": "./Comped"
+    }
+}

@@ -21,6 +21,11 @@
   },
   "homepage": "https://github.com/HL-MechatronicsRobotics-Association/Accss#readme",
   "devDependencies": {
-    "electron": "^7.1.8"
+    "electron": "^7.1.9"
+  },
+  "dependencies": {
+    "echarts": "^4.6.0",
+    "typescript": "^3.7.5",
+    "vue": "^2.6.11"
   }
 }
