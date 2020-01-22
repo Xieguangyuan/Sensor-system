@@ -25,9 +25,11 @@
   },
   "dependencies": {
     "@types/echarts": "^4.4.2",
+    "@types/express": "^4.17.2",
     "@types/zrender": "^4.0.0",
     "echarts": "^4.6.0",
+    "express": "^4.17.1",
     "typescript": "^3.7.5",
-    "vue": "^2.6.11"
+    "zrender": "^4.2.0"
   }
 }

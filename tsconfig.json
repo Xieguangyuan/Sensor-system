@@ -1,0 +1,8 @@
+{
+    "compileOnSave": true,
+    "compilerOptions": {
+        "module": "CommonJS",
+        "rootDir": "./SRC/Script/MainParts",
+        "outDir": "./SRC/Script/Comped",
+    }
+}
