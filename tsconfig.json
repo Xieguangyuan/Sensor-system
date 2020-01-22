@@ -1,5 +1,6 @@
 {
     "compileOnSave": true,
+    "sourceMap": true,
     "compilerOptions": {
         "module": "CommonJS",
         "rootDir": "./SRC/Script/MainParts",
