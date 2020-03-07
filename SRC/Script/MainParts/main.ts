@@ -16,5 +16,4 @@ function createWindow() {
 
 app.on('ready', createWindow);
 
-Server = new NetServerMain(5011);
-Server.ServerRecv();
+Server = new NetServerMain(10086, "192.168.137.1");
