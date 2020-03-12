@@ -1,12 +1,9 @@
 import { app, BrowserWindow } from 'electron';
-import { NetServerMain } from './SocketComu'
-
-let Server: NetServerMain;
 
 function createWindow() {
     let win = new BrowserWindow({
         width: 800,
-        height: 600,
+        height: 1000,
         webPreferences: {
             nodeIntegration: true
         }
@@ -15,5 +12,3 @@ function createWindow() {
 }
 
 app.on('ready', createWindow);
-
-Server = new NetServerMain(10086, "192.168.137.1");

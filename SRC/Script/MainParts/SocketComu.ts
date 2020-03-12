@@ -1,12 +1,23 @@
 import * as net from 'net'
-import { stringify } from 'querystring';
 
 export class NetServerMain {
-    RemotePortList: Array<number> = new Array<number>();
-    RemoteAddressList: Array<string> = new Array<string>();
+
     private deviceID: number = 0;
     private serverMain: net.Server;
+    RemotePortList: Array<number> = new Array<number>();
+    RemoteAddressList: Array<string> = new Array<string>();
+    deviceRTDataBuffer: Array<Array<string>> = new Array<Array<string>>();
+
     constructor(localport: number, localaddress: string) {
+
+        let stringbuffer: Array<string> = new Array<string>();
+        for (let index = 0; index < 10; index++) {
+            stringbuffer[index] = "0";
+        }
+        for (let index = 0; index < 10; index++) {
+            this.deviceRTDataBuffer[index] = stringbuffer;
+        }
+
         this.serverMain = net.createServer();
         this.serverMain.listen(localport, localaddress);
         this.serverMain.on("connection", (socket) => {
@@ -29,5 +40,22 @@ export class NetServerMain {
                 socket.write("4111" + tmp.padStart(3, "0"));
             }
         };
+        if (DataExe.slice(0, 4) == "4200") {
+            let TmpBuffer: string[] = this.SearchAllMatch_str(DataExe.toString());
+            this.deviceRTDataBuffer[TmpBuffer[1]] = TmpBuffer;
+        }
+    }
+
+    private SearchAllMatch_str(data: string): string[] {
+        let index = 0;
+        let count = 0;
+        let dataBuff: Array<string> = new Array<string>();
+        while (data.indexOf("/", index + 1) != -1) {
+            dataBuff[count] = data.slice(index, data.indexOf("/", index + 1));
+            dataBuff[count] = dataBuff[count].slice(1);
+            index = data.indexOf("/", index + 1);
+            count++;
+        }
+        return dataBuff;
     }
 }
