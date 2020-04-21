@@ -2,6 +2,8 @@
     "compileOnSave": true,
     "sourceMap": true,
     "compilerOptions": {
+        "jsx": "react",
+        "target": "ES6",
         "module": "CommonJS",
         "rootDir": "./SRC/Script/MainParts",
         "outDir": "./SRC/Script/Comped",
