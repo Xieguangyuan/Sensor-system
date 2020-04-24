@@ -5,16 +5,23 @@
 
 html,
 body {
-    position: relative;
     height: 100%;
     width: 100%;
 }
 
 body {
-    background-color: #E9F5E9;
+    overflow: hidden;
+    background-color: rgb(255, 255, 255);
+}
+
+#title {
+    background-color: dimgrey;
+    height: 145px;
+    width: 100%;
 }
 
 #root {
-    height: 98%;
-    width: 98%;
+    overflow: auto !important;
+    height: -webkit-calc(100% - 145px);
+    width: 100%;
 }

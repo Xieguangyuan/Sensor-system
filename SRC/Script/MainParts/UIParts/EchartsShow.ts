@@ -27,6 +27,13 @@ export class EchartShowSys {
                 boundaryGap: [1, 1]
             }
         ],
+        grid: {
+            show: true,
+            x: 40,
+            x2: 10,
+            y: 10,
+            y2: 10
+        },
         series: []
     }
 

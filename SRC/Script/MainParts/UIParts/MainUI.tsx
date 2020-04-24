@@ -18,8 +18,6 @@ export module MainPageUI {
 
     class MainPageUI extends React.Component {
         private MainPageUICSS: React.CSSProperties = {
-            position: "absolute",
-            height: "100%",
             width: "100%"
         }
 
@@ -76,13 +74,14 @@ export module MainPageUI {
         private TimerID: NodeJS.Timeout;
         private Gryochart: EchartShowSys;
         private SensorRTChartCSS: React.CSSProperties = {
-            position: "absolute",
             transition: "left 0.2s linear",
             WebkitTransition: "left 0.2s linear",
             transform: "translateZ(0) scale(1, 1)",
             WebkitTransform: "translateZ(0) scale(1, 1)",
-            height: "50%",
-            width: "50%",
+            backgroundColor: "rgb(253, 253, 253)",
+            paddingTop: "43px",
+            height: "250px",
+            width: "70%",
             left: "55px"
         };
 
@@ -94,11 +93,11 @@ export module MainPageUI {
 
         componentDidMount() {
             this.SensorRTChartInit();
+            window.onresize = () => this.Gryochart.EchartAreaUpdate();
             setInterval(() => {
                 this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[1][2]), this.GryoPitch);
                 this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[1][3]), this.GryoRoll);
                 this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[1][4]), this.GryoYaw);
-                this.Gryochart.EchartAreaUpdate();
             }, 100);
         }
 
