@@ -3,137 +3,140 @@ import * as ReactDOM from 'react-dom';
 import { EchartShowSys } from './EchartsShow'
 import { NetServerMain } from '../SocketComu'
 
-export function MainPageSet(): void {
-    ReactDOM.render(
-        (
-            <div>
-                <h1>hello</h1>
-                <MainPageUI />
-            </div>
-        ),
-        document.getElementById('root')
-    )
-}
+export module MainPageUI {
+    let server: NetServerMain;
 
-class MainPageUI extends React.Component {
-    MapArea: JSX.Element;
-    SensorRTChart: JSX.Element;
-    SensorRTDashBorad: JSX.Element;
-
-    public render(): JSX.Element {
-        return (
-            <div id="MainPage">
-                <div id="RTChart"><SensorRTChart /></div>
-                <div id="SensorRTChart"></div>
-                <div id="SensorRTDashBorad"></div>
-            </div>
-        );
-    }
-}
-
-class SensorRTChart extends React.Component {
-    private TimerID: NodeJS.Timeout;
-    private Gryochart: EchartShowSys;
-    private server: NetServerMain;
-    private GryoPitch;
-    private GryoRoll;
-    private GryoYaw;
-
-    public render(): JSX.Element {
-        const css = "#chartGryo{ width: 600px;height: 400px;}";
-        return (
-            <div>
-                <style>
-                    {css}
-                </style>
-                <div id='chartGryo'></div>
-            </div >
+    export function MainPageSet(): void {
+        server = new NetServerMain(10086, "192.168.137.1");
+        ReactDOM.render(
+            (
+                < MainPageUI />
+            ),
+            document.getElementById("root")
         )
     }
 
-    componentDidMount() {
-        this.SensorRTChartInit();
-        this.server = new NetServerMain(10086, "192.168.137.1")
-        setInterval(() => {
-            this.Gryochart.EchartsDataAdd(Number(this.server.deviceRTDataBuffer[1][2]), this.GryoPitch);
-            this.Gryochart.EchartsDataAdd(Number(this.server.deviceRTDataBuffer[1][3]), this.GryoRoll);
-            this.Gryochart.EchartsDataAdd(Number(this.server.deviceRTDataBuffer[1][4]), this.GryoYaw);
-        }, 50);
+    class MainPageUI extends React.Component {
+        private MainPageUICSS: React.CSSProperties = {
+            position: "absolute",
+            height: "100%",
+            width: "100%"
+        }
+
+        public render(): JSX.Element {
+            return (
+                <div id="MainPage" style={this.MainPageUICSS}>
+                    <Barmenu />
+                    <SensorRTChart />
+                </div >
+            );
+        }
     }
 
-    componentWillUnmount() {
-        clearInterval(this.TimerID);
+    class Barmenu extends React.Component {
+
+        public render(): JSX.Element {
+            return (
+                <div className="BarmenuShot">
+                    <div id="Barmenu">
+                        <ul>
+                            <li>
+                                <a href=" ">
+                                    <i className="fa fa-rocket"></i>
+                                    <span id="FlyingMonitor">FlyingMonitor</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href=" ">
+                                    <i className="fa fa-cog"></i>
+                                    <span id="DroneSettings">DroneSettings</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href=" ">
+                                    <i className="fa fa-sliders"></i>
+                                    <span id="AdvanceSetting">AdvanceSetting</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div >
+            )
+        }
     }
 
-    private SensorRTChartInit() {
-        this.Gryochart = new EchartShowSys(document.getElementById('chartGryo'), "Gryo", {
-            width: 600,
-            height: 400
-        }, { ymax: 550, ymin: -550 });
-        this.GryoPitch = this.Gryochart.EhcartSeriesAdd({
-            name: 'Charts',
-            type: 'line',
-            showSymbol: false,
-            hoverAnimation: false,
-            data: new Array(30)
-        })
-        this.GryoRoll = this.Gryochart.EhcartSeriesAdd({
-            name: 'Charts',
-            type: 'line',
-            showSymbol: false,
-            hoverAnimation: false,
-            data: new Array(30)
-        })
-        this.GryoYaw = this.Gryochart.EhcartSeriesAdd({
-            name: 'Charts',
-            type: 'line',
-            showSymbol: false,
-            hoverAnimation: false,
-            data: new Array(30)
-        })
+    class Map extends React.Component {
+
+    }
+
+    class SensorRTChart extends React.Component {
+        private GryoYaw: number;
+        private GryoRoll: number;
+        private GryoPitch: number;
+        private TimerID: NodeJS.Timeout;
+        private Gryochart: EchartShowSys;
+        private SensorRTChartCSS: React.CSSProperties = {
+            position: "absolute",
+            transition: "left 0.2s linear",
+            WebkitTransition: "left 0.2s linear",
+            transform: "translateZ(0) scale(1, 1)",
+            WebkitTransform: "translateZ(0) scale(1, 1)",
+            height: "50%",
+            width: "50%",
+            left: "55px"
+        };
+
+        public render(): JSX.Element {
+            return (
+                <div id='SensorRTChart' style={this.SensorRTChartCSS}></div>
+            )
+        }
+
+        componentDidMount() {
+            this.SensorRTChartInit();
+            setInterval(() => {
+                this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[1][2]), this.GryoPitch);
+                this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[1][3]), this.GryoRoll);
+                this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[1][4]), this.GryoYaw);
+                this.Gryochart.EchartAreaUpdate();
+            }, 100);
+        }
+
+        componentWillUnmount() {
+            clearInterval(this.TimerID);
+        }
+
+        private SensorRTChartInit() {
+            this.Gryochart = new EchartShowSys(document.getElementById('SensorRTChart'), "Gryo", { ymax: 550, ymin: -550 });
+            this.GryoPitch = this.Gryochart.EhcartSeriesAdd({
+                name: 'Charts',
+                type: 'line',
+                showSymbol: false,
+                hoverAnimation: false,
+                data: new Array(30)
+            })
+            this.GryoRoll = this.Gryochart.EhcartSeriesAdd({
+                name: 'Charts',
+                type: 'line',
+                showSymbol: false,
+                hoverAnimation: false,
+                data: new Array(30)
+            })
+            this.GryoYaw = this.Gryochart.EhcartSeriesAdd({
+                name: 'Charts',
+                type: 'line',
+                showSymbol: false,
+                hoverAnimation: false,
+                data: new Array(30)
+            })
+        }
+    }
+
+    class SensorRTDashBorad extends React.Component {
+
+    }
+
+    class GLRTShow extends React.Component {
+
     }
 }
-
-// interface Person {
-//     name: string
-// }
-
-// interface States {
-//     date: Date
-// }
-
-// class MainPageUI extends React.Component<Person, States> {
-//     timerID: NodeJS.Timeout;
-
-//     constructor(props) {
-//         super(props);
-//         this.state = { date: new Date() };
-//     }
-
-//     componentDidMount(): void {
-//         this.timerID = setInterval(
-//             () => this.tick(),
-//             1000
-//         );
-//     }
-
-//     componentWillUnmount(): void {
-//         clearInterval(this.timerID);
-//     }
-
-//     tick() {
-//         this.setState({
-//             date: new Date()
-//         });
-//     }
-
-//     render(): JSX.Element {
-//         return (
-//             <div>
-//                 <h1>Hello, world!</h1>
-//                 <h2>It is {this.props.name}</h2>
-//                 <h3>{this.state.date.toLocaleTimeString()}.</h3>
-//             </div>
-//         );
-//     }
-// }
