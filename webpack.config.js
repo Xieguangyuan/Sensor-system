@@ -35,16 +35,9 @@ module.exports = [{
             },
             {
                 test: /\.css$/,
-                include: path.join(__dirname, 'SRC'),
                 use: [
-                    'style-loader', 'css-loader', {
-                        loader: 'typings-for-css-modules-loader',
-                        options: {
-                            modules: true,
-                            namedExport: true,
-                            camelCAse: true
-                        }
-                    }
+                    'style-loader',
+                    'css-loader',
                 ]
             }
         ]
