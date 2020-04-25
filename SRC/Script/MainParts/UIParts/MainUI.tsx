@@ -18,8 +18,6 @@ export module MainPageUI {
 
     class MainPageUI extends React.Component {
         private MainPageUICSS: React.CSSProperties = {
-            position: "absolute",
-            height: "100%",
             width: "100%"
         }
 
@@ -27,12 +25,15 @@ export module MainPageUI {
             return (
                 <div id="MainPage" style={this.MainPageUICSS}>
                     <Barmenu />
-                    <SensorRTChart />
-                </div >
+                    <div id="MainPageArea">
+                        <div id="RTChartRender"></div>
+                    </div>
+                </div>
             );
         }
     }
 
+    let RenderActiveComponent: number = -1;
     class Barmenu extends React.Component {
 
         public render(): JSX.Element {
@@ -41,19 +42,19 @@ export module MainPageUI {
                     <div id="Barmenu">
                         <ul>
                             <li>
-                                <a href=" ">
+                                <a href="#" onClick={this.FlyingMonitorRender}>
                                     <i className="fa fa-rocket"></i>
                                     <span id="FlyingMonitor">FlyingMonitor</span>
                                 </a>
                             </li>
                             <li>
-                                <a href=" ">
+                                <a href="#" onClick={this.DroneSettingsRender}>
                                     <i className="fa fa-cog"></i>
                                     <span id="DroneSettings">DroneSettings</span>
                                 </a>
                             </li>
                             <li>
-                                <a href=" ">
+                                <a href="#" onClick={this.AdvanceSetting}>
                                     <i className="fa fa-sliders"></i>
                                     <span id="AdvanceSetting">AdvanceSetting</span>
                                 </a>
@@ -63,7 +64,30 @@ export module MainPageUI {
                 </div >
             )
         }
+
+        private FlyingMonitorRender(): void {
+            if (RenderActiveComponent === 0) {
+                ReactDOM.unmountComponentAtNode(document.getElementById("RTChartRender"));
+                RenderActiveComponent = -1;
+            } else if (RenderActiveComponent === -1) {
+                ReactDOM.render(
+                    <SensorRTChart />,
+                    document.getElementById("RTChartRender")
+                )
+                RenderActiveComponent = 0;
+            }
+        }
+
+        private DroneSettingsRender(): void {
+
+        }
+
+        private AdvanceSetting(): void {
+
+        }
     }
+
+    //=================================================================================================================================//
 
     class Map extends React.Component {
 
@@ -76,33 +100,28 @@ export module MainPageUI {
         private TimerID: NodeJS.Timeout;
         private Gryochart: EchartShowSys;
         private SensorRTChartCSS: React.CSSProperties = {
-            position: "absolute",
-            transition: "left 0.2s linear",
-            WebkitTransition: "left 0.2s linear",
-            transform: "translateZ(0) scale(1, 1)",
-            WebkitTransform: "translateZ(0) scale(1, 1)",
-            height: "50%",
-            width: "50%",
-            left: "55px"
+            backgroundColor: "rgb(253, 253, 253)",
+            paddingTop: "43px",
+            height: "250px",
+            width: "50%"
         };
 
         public render(): JSX.Element {
-            return (
-                <div id='SensorRTChart' style={this.SensorRTChartCSS}></div>
-            )
+            return <div id='SensorRTChart' style={this.SensorRTChartCSS}></div>;
         }
 
         componentDidMount() {
             this.SensorRTChartInit();
-            setInterval(() => {
+            window.onresize = () => this.Gryochart.EchartAreaUpdate();
+            this.TimerID = setInterval(() => {
                 this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[1][2]), this.GryoPitch);
                 this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[1][3]), this.GryoRoll);
                 this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[1][4]), this.GryoYaw);
-                this.Gryochart.EchartAreaUpdate();
             }, 100);
         }
 
         componentWillUnmount() {
+            window.onresize = null;
             clearInterval(this.TimerID);
         }
 
