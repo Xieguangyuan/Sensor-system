@@ -21,7 +21,15 @@ body {
 }
 
 #root {
-    overflow: auto !important;
     height: -webkit-calc(100% - 145px);
     width: 100%;
+    overflow: auto !important;
+}
+
+#MainPageArea {
+    margin-left: 55px;
+    transition: margin-left 0.2s linear;
+    -webkit-transition: margin-left 0.2s linear;
+    transform: translateZ(0) scale(1, 1);
+    -webkit-transform: translateZ(0) scale(1, 1);
 }

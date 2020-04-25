@@ -17,8 +17,8 @@
     width: 220px;
 }
 
-.BarmenuShot:hover+#SensorRTChart {
-    left: 220px !important;
+.BarmenuShot:hover+#MainPageArea {
+    margin-left: 220px !important;
 }
 
 #Barmenu {
