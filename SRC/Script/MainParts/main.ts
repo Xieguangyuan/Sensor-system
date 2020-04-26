@@ -8,7 +8,7 @@ function createWindow() {
             nodeIntegration: true
         }
     })
-    win.loadFile('SRC/HTML/index.html');
+    win.loadFile('UIParts/index.html');
 }
 
 app.on('ready', createWindow);

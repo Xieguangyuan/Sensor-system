@@ -2,6 +2,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { EchartShowSys } from './EchartsShow'
 import { NetServerMain } from '../SocketComu'
+import '../../../CSS/BarmenuUI.css';
 
 export module MainPageUI {
     let server: NetServerMain;
