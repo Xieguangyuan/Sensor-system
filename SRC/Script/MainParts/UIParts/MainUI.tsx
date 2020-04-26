@@ -3,7 +3,7 @@ import * as ReactDOM from 'react-dom';
 import { EchartShowSys } from './EchartsShow'
 import { NetServerMain } from '../SocketComu'
 import '../../../CSS/BarmenuUI.css';
-
+import 'font-awesome/css/font-awesome.css'
 export module MainPageUI {
     let server: NetServerMain;
 

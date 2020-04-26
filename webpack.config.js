@@ -39,6 +39,15 @@ module.exports = [{
                     'style-loader',
                     'css-loader',
                 ]
+            },
+            {
+                test: /\.(svg|eot|woff|woff2|ttf)$/,
+                loader: 'url-loader',
+                //webpack和url-loader的作者你🐎死了
+                options: {
+                    esModule: false,
+                },
+                //就这一段傻逼东西搞得font-awesome的font丢失
             }
         ]
     },
