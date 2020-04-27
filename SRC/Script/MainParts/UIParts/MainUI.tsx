@@ -2,8 +2,10 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { EchartShowSys } from './EchartsShow'
 import { NetServerMain } from '../SocketComu'
+import * as leaflet from 'leaflet';
 import '../../../CSS/BarmenuUI.css';
-import 'font-awesome/css/font-awesome.css'
+import 'font-awesome/css/font-awesome.css';
+
 export module MainPageUI {
     let server: NetServerMain;
 
@@ -26,72 +28,155 @@ export module MainPageUI {
             return (
                 <div id="MainPage" style={this.MainPageUICSS}>
                     <Barmenu />
-                    <div id="MainPageArea">
-                        <div id="RTChartRender"></div>
-                    </div>
                 </div>
             );
         }
     }
 
-    let RenderActiveComponent: number = -1;
-    class Barmenu extends React.Component {
+    interface BarmenuProps {
 
-        public render(): JSX.Element {
-            return (
-                <div className="BarmenuShot">
-                    <div id="Barmenu">
-                        <ul>
-                            <li>
-                                <a href="#" onClick={this.FlyingMonitorRender}>
-                                    <i className="fa fa-rocket"></i>
-                                    <span id="FlyingMonitor">FlyingMonitor</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#" onClick={this.DroneSettingsRender}>
-                                    <i className="fa fa-cog"></i>
-                                    <span id="DroneSettings">DroneSettings</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#" onClick={this.AdvanceSetting}>
-                                    <i className="fa fa-sliders"></i>
-                                    <span id="AdvanceSetting">AdvanceSetting</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                </div >
-            )
+    }
+
+    interface BarmenuState {
+        RenaderID: number;
+    }
+
+    class Barmenu extends React.Component<BarmenuProps, BarmenuState> {
+        RenderElement: JSX.Element;
+        constructor(props) {
+            super(props);
+            this.state = { RenaderID: 0 };
+            this.FlyingMonitorRender = this.FlyingMonitorRender.bind(this);
+            this.DroneStatusRender = this.DroneStatusRender.bind(this);
+            this.DroneSettingsRender = this.DroneSettingsRender.bind(this);
+            this.AdvanceSettingRender = this.AdvanceSettingRender.bind(this);
         }
 
         private FlyingMonitorRender(): void {
-            if (RenderActiveComponent === 0) {
-                ReactDOM.unmountComponentAtNode(document.getElementById("RTChartRender"));
-                RenderActiveComponent = -1;
-            } else if (RenderActiveComponent === -1) {
-                ReactDOM.render(
-                    <SensorRTChart />,
-                    document.getElementById("RTChartRender")
-                )
-                RenderActiveComponent = 0;
+            if (this.state.RenaderID != 0) {
+                this.setState({ RenaderID: 0 })
+            }
+        }
+
+        private DroneStatusRender(): void {
+            if (this.state.RenaderID != 1) {
+                this.setState({ RenaderID: 1 })
             }
         }
 
         private DroneSettingsRender(): void {
-
+            if (this.state.RenaderID != 2) {
+                this.setState({ RenaderID: 2 })
+            }
         }
 
-        private AdvanceSetting(): void {
+        private AdvanceSettingRender(): void {
+            if (this.state.RenaderID != 3) {
+                this.setState({ RenaderID: 3 })
+            }
+        }
 
+        public render(): JSX.Element {
+            if (this.state.RenaderID == 0) {
+                this.RenderElement = <FlyingMonitorComponent />;
+            } else if (this.state.RenaderID == 1) {
+                this.RenderElement = <DroneStatusComponent />;
+            } else if (this.state.RenaderID == 2) {
+
+            } else if (this.state.RenaderID == 3) {
+
+            }
+
+            return (
+                <div>
+                    <div className="BarmenuShot">
+                        <div id="Barmenu">
+                            <ul>
+                                <li>
+                                    <a href="#" onClick={this.FlyingMonitorRender}>
+                                        <i className="fa fa-rocket"></i>
+                                        <span id="FlyingMonitor">FlyingMonitor</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" onClick={this.DroneStatusRender}>
+                                        <i className="fa fa-television"></i>
+                                        <span id="DroneStatus">DroneStatus</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" onClick={this.DroneSettingsRender}>
+                                        <i className="fa fa-cog"></i>
+                                        <span id="DroneSettings">DroneSettings</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" onClick={this.AdvanceSettingRender}>
+                                        <i className="fa fa-sliders"></i>
+                                        <span id="AdvanceSetting">AdvanceSetting</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div id="MainPageArea">{this.RenderElement}</div>
+                </div>
+            )
+        }
+    }
+
+    //=================================================================================================================================//
+
+    class FlyingMonitorComponent extends React.Component {
+        public render(): JSX.Element {
+            return (
+                <div>
+                    <Map />
+                </div>
+            );
+        }
+    }
+
+    class DroneStatusComponent extends React.Component {
+        public render(): JSX.Element {
+            return (
+                <div>
+                    <SensorRTChart />
+                </div>
+            );
         }
     }
 
     //=================================================================================================================================//
 
     class Map extends React.Component {
+        MainMap: leaflet.Map;
+        private MapCSS: React.CSSProperties = {
+            height: "200px",
+            width: "80%",
+            float: "right"
+        };
 
+        public render(): JSX.Element {
+            this.MapCSS.height = String(document.getElementById("root").offsetHeight * 0.95) + "px";
+            return (
+                <div id="Map" style={this.MapCSS}></div>
+            );
+        }
+
+        componentDidMount() {
+            window.onresize = () => {
+                document.getElementById("Map").style.height = String(document.getElementById("root").offsetHeight * 0.95) + "px";
+            }
+            this.MainMap = leaflet.map('Map').setView([51.505, -0.09], 13);
+            leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(this.MainMap);
+            leaflet.marker([51.5, -0.09]).addTo(this.MainMap)
+                .bindPopup('A pretty CSS3 popup.<br> Easily customizable.')
+                .openPopup();
+        }
     }
 
     class SensorRTChart extends React.Component {

@@ -48,6 +48,12 @@ module.exports = [{
                     esModule: false,
                 },
                 //就这一段傻逼东西搞得font-awesome的font丢失
+            },
+            {
+                test: /\.(png|jpe?g|gif)$/i,
+                use: [{
+                    loader: 'file-loader',
+                }, ],
             }
         ]
     },
