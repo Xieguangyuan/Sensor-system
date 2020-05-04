@@ -2,7 +2,7 @@
   "name": "accss",
   "version": "0.1.0",
   "description": "Autopilot console",
-  "main": "./SRC/Script/Comped/main.js",
+  "main": "/SRC/Script/Comped/main.js",
   "scripts": {
     "build": "webpack --config ./webpack.config.js",
     "start": "npm run build && electron ./SRC/Script/Comped/main.js"
@@ -22,23 +22,27 @@
   },
   "homepage": "https://github.com/HL-MechatronicsRobotics-Association/Accss#readme",
   "devDependencies": {
-    "electron": "7.1.9",
-    "html-webpack-plugin": "^4.2.0",
-    "typings-for-css-modules-loader": "^1.7.0"
-  },
-  "dependencies": {
     "@types/echarts": "^4.4.5",
+    "@types/leaflet": "^1.5.12",
     "@types/node": "^12.12.35",
     "@types/react": "^16.9.34",
     "@types/react-dom": "^16.9.6",
     "css-loader": "^1.0.1",
-    "echarts": "^4.7.0",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
+    "electron": "^7.1.9",
+    "file-loader": "^6.0.0",
+    "html-webpack-plugin": "^4.2.0",
     "style-loader": "^1.2.0",
     "ts-loader": "^7.0.1",
     "typescript": "^3.8.3",
     "webpack": "^4.43.0",
-    "webpack-cli": "^3.3.11"
+    "webpack-cli": "^3.3.11",
+    "url-loader": "^4.1.0"
+  },
+  "dependencies": {
+    "echarts": "^4.7.0",
+    "font-awesome": "^4.7.0",
+    "leaflet": "^1.6.0",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
   }
 }

@@ -1,7 +1,7 @@
 .BarmenuShot {
     position: absolute;
     left: 0;
-    top: 145px;
+    top: 75px;
     bottom: 0;
     width: 55px;
     transition: width 0.2s linear;
