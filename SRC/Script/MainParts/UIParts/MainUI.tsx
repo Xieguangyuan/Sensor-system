@@ -151,10 +151,6 @@ export module MainPageUI {
     //=================================================================================================================================//
 
     class Map extends React.Component {
-        count;
-        x = 21;
-        y = 110;
-
         MainMap: MapShow;
         private MapCSS: React.CSSProperties = {
             height: "200px",
