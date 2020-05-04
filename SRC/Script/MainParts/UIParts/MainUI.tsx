@@ -1,8 +1,8 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import { MapShow } from './MapShow'
 import { EchartShowSys } from './EchartsShow'
 import { NetServerMain } from '../SocketComu'
-import * as leaflet from 'leaflet';
 import '../../../CSS/BarmenuUI.css';
 import 'font-awesome/css/font-awesome.css';
 
@@ -13,7 +13,7 @@ export module MainPageUI {
         server = new NetServerMain(10086, "192.168.137.1");
         ReactDOM.render(
             (
-                < MainPageUI />
+                <MainPageUI />
             ),
             document.getElementById("root")
         )
@@ -151,7 +151,11 @@ export module MainPageUI {
     //=================================================================================================================================//
 
     class Map extends React.Component {
-        MainMap: leaflet.Map;
+        count;
+        x = 21;
+        y = 110;
+
+        MainMap: MapShow;
         private MapCSS: React.CSSProperties = {
             height: "200px",
             width: "80%",
@@ -169,13 +173,11 @@ export module MainPageUI {
             window.onresize = () => {
                 document.getElementById("Map").style.height = String(document.getElementById("root").offsetHeight * 0.95) + "px";
             }
-            this.MainMap = leaflet.map('Map').setView([51.505, -0.09], 13);
-            leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(this.MainMap);
-            leaflet.marker([51.5, -0.09]).addTo(this.MainMap)
-                .bindPopup('A pretty CSS3 popup.<br> Easily customizable.')
-                .openPopup();
+            this.MainMap = new MapShow("Map");
+        }
+
+        componentWillUnmount() {
+            window.onresize = null;
         }
     }
 
