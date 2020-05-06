@@ -121,6 +121,10 @@ export module MainPageUI {
                     </div>
 
                     <div id="MainPageArea">{this.RenderElement}</div>
+                    <div id="footBar">
+                        <div id="footName"> ACCSS by TSKangetsu </div>
+                        <div id="footVersion"> Version  0.0.1-Beta </div>
+                    </div>
                 </div>
             )
         }
@@ -133,6 +137,7 @@ export module MainPageUI {
             return (
                 <div>
                     <Map />
+                    <GLRTShow />
                 </div>
             );
         }
@@ -151,15 +156,16 @@ export module MainPageUI {
     //=================================================================================================================================//
 
     class Map extends React.Component {
+        //height为不安定要素，bug难以复现，须注意
         MainMap: MapShow;
         private MapCSS: React.CSSProperties = {
             height: "200px",
-            width: "80%",
+            width: "-webkit-calc(100% - 350px)",
             float: "right"
         };
 
         public render(): JSX.Element {
-            this.MapCSS.height = String(document.getElementById("root").offsetHeight * 0.95) + "px";
+            this.MapCSS.height = String(document.getElementById("root").offsetHeight - 18) + "px";
             return (
                 <div id="Map" style={this.MapCSS}></div>
             );
@@ -167,7 +173,7 @@ export module MainPageUI {
 
         componentDidMount() {
             window.onresize = () => {
-                document.getElementById("Map").style.height = String(document.getElementById("root").offsetHeight * 0.95) + "px";
+                document.getElementById("Map").style.height = String(document.getElementById("root").offsetHeight - 18) + "px";
             }
             this.MainMap = new MapShow("Map");
         }
@@ -240,6 +246,13 @@ export module MainPageUI {
     }
 
     class GLRTShow extends React.Component {
+        private GLRTMainCSS: React.CSSProperties = {
+            width: "350px",
+            height: "260px"
+        }
 
+        public render(): JSX.Element {
+            return <div id="GLRT" style={this.GLRTMainCSS}></div>
+        }
     }
 }
