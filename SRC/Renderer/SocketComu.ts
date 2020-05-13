@@ -24,6 +24,8 @@ export class NetServerMain {
             socket.on('data', (data) => {
                 this.PreDataExend(<string><unknown>data, socket);
             });
+            socket.on('close', () => {
+            })
         });
     }
 
@@ -44,6 +46,10 @@ export class NetServerMain {
             let TmpBuffer: string[] = this.SearchAllMatch_str(DataExe.toString());
             this.deviceRTDataBuffer[TmpBuffer[1]] = TmpBuffer;
         }
+    }
+
+    private DeviceDisconnected() {
+
     }
 
     private SearchAllMatch_str(data: string): string[] {

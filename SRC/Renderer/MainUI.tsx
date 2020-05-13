@@ -1,15 +1,14 @@
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import * as React from 'react'
+import * as ReactDOM from 'react-dom'
+import * as cv from 'opencv4nodejs'
 import { MapShow } from './MapShow'
 import { EchartShowSys } from './EchartsShow'
-import { NetServerMain } from '../SocketComu'
-import '../../../CSS/BarmenuUI.css';
-import 'font-awesome/css/font-awesome.css';
+import { NetServerMain } from './SocketComu'
 
 export module MainPageUI {
     let server: NetServerMain;
-
     export function MainPageSet(): void {
+        console.log(cv.version.minor);
         server = new NetServerMain(10086, "192.168.137.1");
         ReactDOM.render(
             (
