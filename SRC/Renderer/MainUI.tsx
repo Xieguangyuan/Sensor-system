@@ -241,6 +241,7 @@ export module MainPageUI {
     }
 
     class CVShowArea extends React.Component {
+        serverProcess: ps.ChildProcess;
         public render(): JSX.Element {
             this.MJPEGServerINIT();
             return (
@@ -251,7 +252,7 @@ export module MainPageUI {
         }
 
         MJPEGServerINIT() {
-            ps.exec("dir", (error, stdout, stderr) => {
+            this.serverProcess = ps.exec(".\\extModule\\ACCSSVideoServer.exe", (error, stdout, stderr) => {
                 if (error) {
                     console.log(`error: ${error.message}`);
                     return;
@@ -262,10 +263,11 @@ export module MainPageUI {
                 }
                 console.log(`stdout: ${stdout}`);
             });
-
         }
 
         componentWillUnmount() {
+            //windows Only
+            ps.spawn("taskkill", ["/pid", String(this.serverProcess.pid), '/f', '/t']);
             document.getElementById("myImage").setAttribute("src", "");
         }
     }
