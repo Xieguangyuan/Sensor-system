@@ -246,6 +246,7 @@ export module MainPageUI {
 
     class CVShowArea extends React.Component {
         serverProcess: ps.ChildProcess;
+
         public render(): JSX.Element {
             this.MJPEGServerINIT();
             return (
@@ -256,7 +257,7 @@ export module MainPageUI {
         }
 
         MJPEGServerINIT() {
-            this.serverProcess = ps.exec(JSONConfig.renderMJPEGServerBinWin, (error, stdout, stderr) => {
+            this.serverProcess = ps.exec(JSONConfig.renderMJPEGServerBinWin + " -f='192.168.137.240' -fp=10086 ", (error, stdout, stderr) => {
                 if (error) {
                     console.log(`error: ${error.message}`);
                     return;
