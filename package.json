@@ -40,7 +40,6 @@
     "echarts": "^4.7.0",
     "font-awesome": "^4.7.0",
     "leaflet": "^1.6.0",
-    "opencv4nodejs": "^4.2.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1"
   }

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
-import * as cv from 'opencv4nodejs'
+import * as ps from 'child_process'
 import { MapShow } from './MapShow'
 import { EchartShowSys } from './EchartsShow'
 import { NetServerMain } from './SocketComu'
@@ -8,7 +8,6 @@ import { NetServerMain } from './SocketComu'
 export module MainPageUI {
     let server: NetServerMain;
     export function MainPageSet(): void {
-        console.log(cv.version.minor);
         server = new NetServerMain(10086, "192.168.137.1");
         ReactDOM.render(
             (
@@ -147,6 +146,7 @@ export module MainPageUI {
             return (
                 <div>
                     <SensorRTChart />
+                    <CVShowArea />
                 </div>
             );
         }
@@ -240,8 +240,34 @@ export module MainPageUI {
         }
     }
 
-    class SensorRTDashBorad extends React.Component {
+    class CVShowArea extends React.Component {
+        public render(): JSX.Element {
+            this.MJPEGServerINIT();
+            return (
+                <div>
+                    <img id="myImage" src='http://localhost:10089'></img>
+                </div>
+            );
+        }
 
+        MJPEGServerINIT() {
+            ps.exec("dir", (error, stdout, stderr) => {
+                if (error) {
+                    console.log(`error: ${error.message}`);
+                    return;
+                }
+                if (stderr) {
+                    console.log(`stderr: ${stderr}`);
+                    return;
+                }
+                console.log(`stdout: ${stdout}`);
+            });
+
+        }
+
+        componentWillUnmount() {
+            document.getElementById("myImage").setAttribute("src", "");
+        }
     }
 
     class GLRTShow extends React.Component {
