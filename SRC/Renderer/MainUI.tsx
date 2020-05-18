@@ -1,5 +1,6 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
+import * as fs from 'fs'
 import * as ps from 'child_process'
 import { MapShow } from './MapShow'
 import { EchartShowSys } from './EchartsShow'
@@ -7,8 +8,11 @@ import { NetServerMain } from './SocketComu'
 
 export module MainPageUI {
     let server: NetServerMain;
+    let JSONConfig: any;
     export function MainPageSet(): void {
-        server = new NetServerMain(10086, "192.168.137.1");
+        JSONConfig = JSON.parse(String(fs.readFileSync('ACCSSConfig.json')));
+        console.log(JSONConfig.nodeServerIP);
+        server = new NetServerMain(JSONConfig.nodeServerPort, JSONConfig.nodeServerIP);
         ReactDOM.render(
             (
                 <MainPageUI />
@@ -245,14 +249,14 @@ export module MainPageUI {
         public render(): JSX.Element {
             this.MJPEGServerINIT();
             return (
-                <div>
-                    <img id="myImage" src='http://localhost:10089'></img>
+                <div id="cvController">
+                    <img id="myImage" src={JSONConfig.renderMJPEGServerSRC}></img>
                 </div>
             );
         }
 
         MJPEGServerINIT() {
-            this.serverProcess = ps.exec(".\\extModule\\ACCSSVideoServer\\build\\Debug\\ACCSSVideoServer.exe", (error, stdout, stderr) => {
+            this.serverProcess = ps.exec(JSONConfig.renderMJPEGServerBinWin, (error, stdout, stderr) => {
                 if (error) {
                     console.log(`error: ${error.message}`);
                     return;

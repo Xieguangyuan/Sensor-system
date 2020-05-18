@@ -1,4 +1,5 @@
 import * as path from 'path'
+import * as ps from 'child_process'
 import { format as formatUrl } from 'url'
 import { app, BrowserWindow } from 'electron';
 const isDevelopment = process.env.NODE_ENV !== 'production'
@@ -28,3 +29,6 @@ function createWindow() {
 }
 
 app.on('ready', createWindow);
+app.on('window-all-closed', () => {
+    ps.spawn("taskkill", ["/F", "/IM", "ACCSSVideoServer.exe"]);
+})

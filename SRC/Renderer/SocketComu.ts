@@ -24,8 +24,6 @@ export class NetServerMain {
             socket.on('data', (data) => {
                 this.PreDataExend(<string><unknown>data, socket);
             });
-            socket.on('close', () => {
-            })
         });
     }
 
