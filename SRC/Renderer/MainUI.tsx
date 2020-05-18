@@ -252,7 +252,7 @@ export module MainPageUI {
         }
 
         MJPEGServerINIT() {
-            this.serverProcess = ps.exec(".\\extModule\\ACCSSVideoServer.exe", (error, stdout, stderr) => {
+            this.serverProcess = ps.exec(".\\extModule\\ACCSSVideoServer\\build\\Debug\\ACCSSVideoServer.exe", (error, stdout, stderr) => {
                 if (error) {
                     console.log(`error: ${error.message}`);
                     return;
@@ -267,7 +267,7 @@ export module MainPageUI {
 
         componentWillUnmount() {
             //windows Only
-            ps.spawn("taskkill", ["/pid", String(this.serverProcess.pid), '/f', '/t']);
+            ps.spawn("taskkill", ["/F", "/IM", "ACCSSVideoServer.exe"]);
             document.getElementById("myImage").setAttribute("src", "");
         }
     }

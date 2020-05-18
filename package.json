@@ -6,7 +6,8 @@
   "scripts": {
     "rebuild": "electron-rebuild -w opencv4nodejs",
     "startdev": "electron-webpack dev",
-    "start": "electron-webpack"
+    "start": "electron-webpack",
+    "buildext": ".\\extModule\\ACCSSVideoServer\\build.bat"
   },
   "repository": {
     "type": "git",

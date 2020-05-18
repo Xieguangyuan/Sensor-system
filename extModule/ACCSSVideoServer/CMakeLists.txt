@@ -1,0 +1,7 @@
+﻿cmake_minimum_required (VERSION 3.8)
+project ("ACCSSVideoServer")
+find_package(OpenCV REQUIRED)
+include_directories(${OpenCV_INCLUDE_DIRS})
+aux_source_directory(. main)
+add_executable (ACCSSVideoServer ${main})
+target_link_libraries(ACCSSVideoServer ${OpenCV_LIBS})
