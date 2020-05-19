@@ -1,16 +1,18 @@
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import * as React from 'react'
+import * as ReactDOM from 'react-dom'
+import * as fs from 'fs'
+import * as ps from 'child_process'
 import { MapShow } from './MapShow'
 import { EchartShowSys } from './EchartsShow'
-import { NetServerMain } from '../SocketComu'
-import '../../../CSS/BarmenuUI.css';
-import 'font-awesome/css/font-awesome.css';
+import { NetServerMain } from './SocketComu'
 
 export module MainPageUI {
     let server: NetServerMain;
-
+    let JSONConfig: any;
     export function MainPageSet(): void {
-        server = new NetServerMain(10086, "192.168.137.1");
+        JSONConfig = JSON.parse(String(fs.readFileSync('ACCSSConfig.json')));
+        console.log(JSONConfig.nodeServerIP);
+        server = new NetServerMain(JSONConfig.nodeServerPort, JSONConfig.nodeServerIP);
         ReactDOM.render(
             (
                 <MainPageUI />
@@ -121,6 +123,10 @@ export module MainPageUI {
                     </div>
 
                     <div id="MainPageArea">{this.RenderElement}</div>
+                    <div id="footBar">
+                        <div id="footName"> ACCSS by TSKangetsu </div>
+                        <div id="footVersion"> Version  0.0.1-Beta </div>
+                    </div>
                 </div>
             )
         }
@@ -133,6 +139,7 @@ export module MainPageUI {
             return (
                 <div>
                     <Map />
+                    <GLRTShow />
                 </div>
             );
         }
@@ -143,6 +150,7 @@ export module MainPageUI {
             return (
                 <div>
                     <SensorRTChart />
+                    <CVShowArea />
                 </div>
             );
         }
@@ -151,15 +159,16 @@ export module MainPageUI {
     //=================================================================================================================================//
 
     class Map extends React.Component {
+        //height为不安定要素，bug难以复现，须注意
         MainMap: MapShow;
         private MapCSS: React.CSSProperties = {
             height: "200px",
-            width: "80%",
+            width: "-webkit-calc(100% - 350px)",
             float: "right"
         };
 
         public render(): JSX.Element {
-            this.MapCSS.height = String(document.getElementById("root").offsetHeight * 0.95) + "px";
+            this.MapCSS.height = String(document.getElementById("root").offsetHeight - 18) + "px";
             return (
                 <div id="Map" style={this.MapCSS}></div>
             );
@@ -167,7 +176,7 @@ export module MainPageUI {
 
         componentDidMount() {
             window.onresize = () => {
-                document.getElementById("Map").style.height = String(document.getElementById("root").offsetHeight * 0.95) + "px";
+                document.getElementById("Map").style.height = String(document.getElementById("root").offsetHeight - 18) + "px";
             }
             this.MainMap = new MapShow("Map");
         }
@@ -235,11 +244,47 @@ export module MainPageUI {
         }
     }
 
-    class SensorRTDashBorad extends React.Component {
+    class CVShowArea extends React.Component {
+        serverProcess: ps.ChildProcess;
 
+        public render(): JSX.Element {
+            this.MJPEGServerINIT();
+            return (
+                <div id="cvController">
+                    <img id="myImage" src={JSONConfig.renderMJPEGServerSRC}></img>
+                </div>
+            );
+        }
+
+        MJPEGServerINIT() {
+            this.serverProcess = ps.exec(JSONConfig.renderMJPEGServerBinWin + " -f='192.168.137.240' -fp=10086 ", (error, stdout, stderr) => {
+                if (error) {
+                    console.log(`error: ${error.message}`);
+                    return;
+                }
+                if (stderr) {
+                    console.log(`stderr: ${stderr}`);
+                    return;
+                }
+                console.log(`stdout: ${stdout}`);
+            });
+        }
+
+        componentWillUnmount() {
+            //windows Only
+            ps.spawn("taskkill", ["/F", "/IM", "ACCSSVideoServer.exe"]);
+            document.getElementById("myImage").setAttribute("src", "");
+        }
     }
 
     class GLRTShow extends React.Component {
+        private GLRTMainCSS: React.CSSProperties = {
+            width: "350px",
+            height: "260px"
+        }
 
+        public render(): JSX.Element {
+            return <div id="GLRT" style={this.GLRTMainCSS}></div>
+        }
     }
 }

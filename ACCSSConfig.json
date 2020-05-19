@@ -1,0 +1,6 @@
+{
+    "nodeServerIP": "0.0.0.0",
+    "nodeServerPort": 10086,
+    "renderMJPEGServerSRC": "http://localhost:10089",
+    "renderMJPEGServerBinWin": ".\\extModule\\ACCSSVideoServer\\build\\Debug\\ACCSSVideoServer.exe"
+}

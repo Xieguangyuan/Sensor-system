@@ -8,6 +8,19 @@ export class NetServerMain {
     RemoteAddressList: Array<string> = new Array<string>();
     deviceRTDataBuffer: Array<Array<string>> = new Array<Array<string>>();
 
+    public getUseableID(): number[] {
+        let indexid = 0;
+        let useableID: Array<number> = new Array<number>();
+        for (let index = 0; index < 255; index++) {
+            if (this.RemoteAddressList[index] != null) {
+                useableID[indexid] = Number(this.IPDeviceIDParese(this.RemoteAddressList[index]));
+                indexid++;
+            }
+        }
+
+        return useableID;
+    }
+
     constructor(localport: number, localaddress: string) {
 
         let stringbuffer: Array<string> = new Array<string>();
@@ -24,6 +37,10 @@ export class NetServerMain {
             socket.on('data', (data) => {
                 this.PreDataExend(<string><unknown>data, socket);
             });
+            socket.on('close', () => {
+                console.log(socket.remoteAddress + " has disconnect");
+                this.RemoteAddressList[this.IPDeviceIDParese(socket.remoteAddress)] = null;
+            })
         });
     }
 
@@ -32,18 +49,30 @@ export class NetServerMain {
             socket.write("4010");
         };
         if (DataExe.slice(0, 4) == "4110") {
-            if (this.deviceID < 999) {
-                this.deviceID += 1;
-                this.RemoteAddressList[this.deviceID] = socket.remoteAddress;
-                this.RemotePortList[this.deviceID] = socket.remotePort;
-                let tmp: string = this.deviceID.toString();
-                socket.write("4111" + tmp.padStart(3, "0"));
-            }
+            let id = this.IPDeviceIDParese(socket.remoteAddress);
+            this.RemoteAddressList[id] = socket.remoteAddress;
+            this.RemotePortList[id] = socket.remotePort;
+            socket.write("4111" + id.toString().padStart(3, "0"));
         };
         if (DataExe.slice(0, 4) == "4200") {
+            let id = this.IPDeviceIDParese(socket.remoteAddress);
             let TmpBuffer: string[] = this.SearchAllMatch_str(DataExe.toString());
-            this.deviceRTDataBuffer[TmpBuffer[1]] = TmpBuffer;
+            this.deviceRTDataBuffer[id] = TmpBuffer;
         }
+    }
+
+    private IPDeviceIDParese(ip: string): number {
+        let index = 0;
+        let count = 0;
+        let dataBuff: Array<string> = new Array<string>();
+        while (ip.indexOf(".", index + 1) != -1) {
+            dataBuff[count] = ip.slice(index, ip.indexOf(".", index + 1));
+            dataBuff[count] = dataBuff[count].slice(1);
+            index = ip.indexOf(".", index + 1);
+            count++;
+        }
+        dataBuff[3] = ip.slice(index + 1);
+        return Number(dataBuff[3]);
     }
 
     private SearchAllMatch_str(data: string): string[] {
