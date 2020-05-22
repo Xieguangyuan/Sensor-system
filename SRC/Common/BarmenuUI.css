@@ -2,7 +2,7 @@
     position: absolute;
     left: 0;
     top: 75px;
-    bottom: 0;
+    bottom: 18px;
     width: 55px;
     transition: width 0.2s linear;
     -webkit-transition: width 0.2s linear;
@@ -90,4 +90,47 @@
     border-left: 1px solid #000000;
     font-size: 11px;
     float: right;
+}
+
+.deviceListShot {
+    position: fixed;
+    float: right;
+    right: 0;
+    top: 75px;
+    bottom: 18px;
+    width: 0px;
+    transition: width 0.2s linear;
+    -webkit-transition: width 0.2s linear;
+    transform: translateZ(0) scale(1, 1);
+    -webkit-transform: translateZ(0) scale(1, 1);
+    background-color: #555050;
+    box-shadow: 1px 0 15px rgba(66, 61, 61, 0.07);
+    overflow: hidden;
+}
+
+#deviceList {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 250px;
+    overflow-y: auto;
+}
+
+
+
+#footDevice {
+    height: 18px;
+    padding: 1px;
+    padding-left: 8px;
+    padding-right: 8px;
+    font-size: 11px;
+    float: right;
+    border-left: 1px solid #000000;
+    text-decoration: none;
+    color: #000000;
+}
+
+#footDevice:hover {
+    background-color: #939468;
 }

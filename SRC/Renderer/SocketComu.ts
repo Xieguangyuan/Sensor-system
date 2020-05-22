@@ -1,9 +1,8 @@
 import * as net from 'net'
 
 export class NetServerMain {
-
-    private deviceID: number = 0;
     private serverMain: net.Server;
+    dataReturnSet: string;
     RemotePortList: Array<number> = new Array<number>();
     RemoteAddressList: Array<string> = new Array<string>();
     deviceRTDataBuffer: Array<Array<string>> = new Array<Array<string>>();
@@ -17,7 +16,6 @@ export class NetServerMain {
                 indexid++;
             }
         }
-
         return useableID;
     }
 
@@ -34,6 +32,7 @@ export class NetServerMain {
         this.serverMain = net.createServer();
         this.serverMain.listen(localport, localaddress);
         this.serverMain.on("connection", (socket) => {
+            console.log(console.log("incomming ip:" + socket.remoteAddress));
             socket.on('data', (data) => {
                 this.PreDataExend(<string><unknown>data, socket);
             });
@@ -42,22 +41,27 @@ export class NetServerMain {
                 this.RemoteAddressList[this.IPDeviceIDParese(socket.remoteAddress)] = null;
             })
         });
+        this.serverMain.on('close', () => {
+            console.log("has disconnect");
+        })
     }
 
     private PreDataExend(DataExe: string, socket: net.Socket) {
         if (DataExe.slice(0, 4) == "4000") {
+            console.log("incomming id:" + this.IPDeviceIDParese(socket.remoteAddress))
             socket.write("4010");
         };
         if (DataExe.slice(0, 4) == "4110") {
             let id = this.IPDeviceIDParese(socket.remoteAddress);
             this.RemoteAddressList[id] = socket.remoteAddress;
             this.RemotePortList[id] = socket.remotePort;
-            socket.write("4111" + id.toString().padStart(3, "0"));
+            socket.write("4111/" + id.toString().padStart(3, "0"));
         };
         if (DataExe.slice(0, 4) == "4200") {
             let id = this.IPDeviceIDParese(socket.remoteAddress);
             let TmpBuffer: string[] = this.SearchAllMatch_str(DataExe.toString());
             this.deviceRTDataBuffer[id] = TmpBuffer;
+            socket.write("4300/OK/!");
         }
     }
 
