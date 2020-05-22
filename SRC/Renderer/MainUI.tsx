@@ -7,8 +7,8 @@ import { EchartShowSys } from './EchartsShow'
 import { NetServerMain } from './SocketComu'
 
 export module MainPageUI {
-    let server: NetServerMain;
     let JSONConfig: any;
+    let server: NetServerMain;
     export function MainPageSet(): void {
         JSONConfig = JSON.parse(String(fs.readFileSync('ACCSSConfig.json')));
         console.log(JSONConfig.nodeServerIP);
@@ -30,6 +30,7 @@ export module MainPageUI {
             return (
                 <div id="MainPage" style={this.MainPageUICSS}>
                     <Barmenu />
+                    <FootTitle />
                 </div>
             );
         }
@@ -84,7 +85,7 @@ export module MainPageUI {
             } else if (this.state.RenaderID == 1) {
                 this.RenderElement = <DroneStatusComponent />;
             } else if (this.state.RenaderID == 2) {
-
+                this.RenderElement = <DroneSettingsComponent />
             } else if (this.state.RenaderID == 3) {
 
             }
@@ -121,14 +122,68 @@ export module MainPageUI {
                             </ul>
                         </div>
                     </div>
-
                     <div id="MainPageArea">{this.RenderElement}</div>
-                    <div id="footBar">
-                        <div id="footName"> ACCSS by TSKangetsu </div>
-                        <div id="footVersion"> Version  0.0.1-Beta </div>
-                    </div>
                 </div>
             )
+        }
+    }
+
+    interface footTitleProps {
+
+    }
+
+    interface footTileState {
+        DeviceCount: number;
+        deviceListIsShow: boolean;
+    }
+
+    class FootTitle extends React.Component<footTitleProps, footTileState> {
+        timerID: NodeJS.Timeout;
+        deviceList: Array<number>;
+        deviceListElement: Array<JSX.Element>;
+        constructor(props) {
+            super(props);
+            this.state = { DeviceCount: 0, deviceListIsShow: false }
+            this.showDeviceList = this.showDeviceList.bind(this);
+        }
+
+        componentDidMount() {
+            this.timerID = setInterval(() => {
+                this.setState({ DeviceCount: server.getUseableID().length });
+            }, 1000)
+        }
+
+        showDeviceList() {
+            if (this.state.deviceListIsShow) {
+                this.setState({ deviceListIsShow: false })
+            } else if (!this.state.deviceListIsShow) {
+                this.setState({ deviceListIsShow: true })
+            }
+            this.deviceList = server.getUseableID();
+            for (let index = 0; index < this.deviceList.length; index++) {
+                this.deviceListElement.push(<li>
+                    <a href="#">
+                        <span>{this.deviceList[index]}</span>
+                    </a>
+                </li>);
+            }
+        }
+
+        public render(): JSX.Element {
+            return (
+                <div id="footBar">
+                    <div className="deviceListShot" style={{ width: this.state.deviceListIsShow ? "250px" : "0" }}>
+                        <div id="deviceList">
+                            <ul>
+                                {this.deviceListElement}
+                            </ul>
+                        </div>
+                    </div>
+                    <div id="footName"> ACCSS by TSKangetsu </div>
+                    <div id="footVersion"> Version  0.0.1-Beta </div>
+                    <a href="#" onClick={this.showDeviceList} id="footDevice">Connected_Device:{this.state.DeviceCount}</a>
+                </div>
+            );
         }
     }
 
@@ -151,6 +206,16 @@ export module MainPageUI {
                 <div>
                     <SensorRTChart />
                     <CVShowArea />
+                </div>
+            );
+        }
+    }
+
+    class DroneSettingsComponent extends React.Component {
+        public render(): JSX.Element {
+            return (
+                <div id="settingpanel">
+                    <div id="controllertypepanel"></div>
                 </div>
             );
         }
