@@ -14,21 +14,21 @@ export module MainPageUI {
         console.log(JSONConfig.nodeServerIP);
         server = new NetServerMain(JSONConfig.nodeServerPort, JSONConfig.nodeServerIP);
         ReactDOM.render(
-            (
+            [
                 <MainPageUI />
-            ),
+            ],
             document.getElementById("root")
         )
     }
 
     class MainPageUI extends React.Component {
 
-        public render(): JSX.Element {
+        public render() {
             return (
-                <div id="MainPage">
-                    <Barmenu />
+                [
+                    <Barmenu />,
                     <FootTitle />
-                </div>
+                ]
             );
         }
     }
@@ -76,7 +76,7 @@ export module MainPageUI {
             }
         }
 
-        public render(): JSX.Element {
+        public render() {
             if (this.state.RenaderID == 0) {
                 this.RenderElement = <FlyingMonitorComponent />;
             } else if (this.state.RenaderID == 1) {
@@ -88,7 +88,7 @@ export module MainPageUI {
             }
 
             return (
-                <div className="BarAndShowArea">
+                [
                     <div className="BarmenuShot">
                         <div id="Barmenu">
                             <ul>
@@ -118,9 +118,9 @@ export module MainPageUI {
                                 </li>
                             </ul>
                         </div>
-                    </div>
+                    </div>,
                     <div id="MainPageArea">{this.RenderElement}</div>
-                </div>
+                ]
             )
         }
     }
@@ -176,8 +176,8 @@ export module MainPageUI {
             }
         }
 
-        public render(): JSX.Element {
-            return (
+        public render() {
+            return [
                 <div id="footBar">
                     <div className="deviceListShot" style={{ height: this.state.deviceListIsShow ? "400px" : "0" }}>
                         <div id="deviceList">
@@ -196,38 +196,34 @@ export module MainPageUI {
                     <a href="#" id="footVersion"> Version  0.0.1-Beta </a>
                     <a href="#" onClick={this.showDeviceList} id="footDevice">Connected Device:{this.state.DeviceCount}</a>
                 </div>
-            );
+            ];
         }
     }
 
     //=================================================================================================================================//
 
     class FlyingMonitorComponent extends React.Component {
-        public render(): JSX.Element {
-            return (
+        public render() {
+            return [
                 <Map />
-            );
+            ];
         }
     }
 
     class DroneStatusComponent extends React.Component {
-        public render(): JSX.Element {
+        public render() {
             return (
-                <div>
-                    <SensorRTChart />
+                [
+                    <SensorRTChart />,
                     <CVShowArea />
-                </div>
+                ]
             );
         }
     }
 
     class DroneSettingsComponent extends React.Component {
-        public render(): JSX.Element {
-            return (
-                <div id="settingpanel">
-                    <div id="controllertypepanel"></div>
-                </div>
-            );
+        public render() {
+            return [<div id="controllertypepanel"></div>]
         }
     }
 
@@ -238,29 +234,20 @@ export module MainPageUI {
         MainMap: MapShow;
         private MapCSS: React.CSSProperties = {
             position: "absolute",
-            height: "200px",
-            width: "-webkit-calc(100% - 350px)",
-            right: "40px"
+            height: "-webkit-calc(100% - 48px)",
+            width: "-webkit-calc(100% - 430px)",
+            right: "45px",
+            border: "3px solid #000000"
         };
 
-        public render(): JSX.Element {
-            this.MapCSS.height = String(document.getElementById("root").offsetHeight - 45) + "px";
-            return (
-                <div className="MapMain">
-                    <div id="Map" style={this.MapCSS}></div>
-                </div>
-            );
+        public render() {
+            return [
+                <div id="Map" style={this.MapCSS}></div>
+            ];
         }
 
         componentDidMount() {
-            window.onresize = () => {
-                document.getElementById("Map").style.height = String(document.getElementById("root").offsetHeight - 45) + "px";
-            }
             this.MainMap = new MapShow("Map");
-        }
-
-        componentWillUnmount() {
-            window.onresize = null;
         }
     }
 
@@ -277,8 +264,8 @@ export module MainPageUI {
             width: "50%"
         };
 
-        public render(): JSX.Element {
-            return <div id='SensorRTChart' style={this.SensorRTChartCSS}></div>;
+        public render() {
+            return [<div id='SensorRTChart' style={this.SensorRTChartCSS}></div>];
         }
 
         componentDidMount() {
@@ -325,13 +312,11 @@ export module MainPageUI {
     class CVShowArea extends React.Component {
         serverProcess: ps.ChildProcess;
 
-        public render(): JSX.Element {
+        public render() {
             this.MJPEGServerINIT();
-            return (
-                <div id="cvController">
-                    <img id="myImage" src={JSONConfig.renderMJPEGServerSRC}></img>
-                </div>
-            );
+            return [
+                <img id="myImage" src={JSONConfig.renderMJPEGServerSRC}></img>
+            ];
         }
 
         MJPEGServerINIT() {
@@ -361,8 +346,8 @@ export module MainPageUI {
             height: "260px"
         }
 
-        public render(): JSX.Element {
-            return <div id="GLRT" style={this.GLRTMainCSS}></div>
+        public render() {
+            return [<div id="GLRT" style={this.GLRTMainCSS}></div>]
         }
     }
 }

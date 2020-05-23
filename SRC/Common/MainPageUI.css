@@ -34,6 +34,7 @@ body {
 }
 
 #MainPageArea {
+    height: 100%;
     margin-left: 55px;
     transition: margin-left 0.2s linear;
     -webkit-transition: margin-left 0.2s linear;
