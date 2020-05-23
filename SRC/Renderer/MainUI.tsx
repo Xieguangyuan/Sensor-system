@@ -22,13 +22,10 @@ export module MainPageUI {
     }
 
     class MainPageUI extends React.Component {
-        private MainPageUICSS: React.CSSProperties = {
-            width: "100%"
-        }
 
         public render(): JSX.Element {
             return (
-                <div id="MainPage" style={this.MainPageUICSS}>
+                <div id="MainPage">
                     <Barmenu />
                     <FootTitle />
                 </div>
@@ -91,7 +88,7 @@ export module MainPageUI {
             }
 
             return (
-                <div>
+                <div className="BarAndShowArea">
                     <div className="BarmenuShot">
                         <div id="Barmenu">
                             <ul>
@@ -208,10 +205,7 @@ export module MainPageUI {
     class FlyingMonitorComponent extends React.Component {
         public render(): JSX.Element {
             return (
-                <div>
-                    <Map />
-                    <GLRTShow />
-                </div>
+                <Map />
             );
         }
     }
@@ -243,21 +237,24 @@ export module MainPageUI {
         //height为不安定要素，bug难以复现，须注意
         MainMap: MapShow;
         private MapCSS: React.CSSProperties = {
+            position: "absolute",
             height: "200px",
             width: "-webkit-calc(100% - 350px)",
-            float: "right"
+            right: "40px"
         };
 
         public render(): JSX.Element {
-            this.MapCSS.height = String(document.getElementById("root").offsetHeight - 18) + "px";
+            this.MapCSS.height = String(document.getElementById("root").offsetHeight - 45) + "px";
             return (
-                <div id="Map" style={this.MapCSS}></div>
+                <div className="MapMain">
+                    <div id="Map" style={this.MapCSS}></div>
+                </div>
             );
         }
 
         componentDidMount() {
             window.onresize = () => {
-                document.getElementById("Map").style.height = String(document.getElementById("root").offsetHeight - 18) + "px";
+                document.getElementById("Map").style.height = String(document.getElementById("root").offsetHeight - 45) + "px";
             }
             this.MainMap = new MapShow("Map");
         }
