@@ -233,20 +233,50 @@ export module MainPageUI {
         //height为不安定要素，bug难以复现，须注意
         MainMap: MapShow;
         private MapCSS: React.CSSProperties = {
+            minWidth: "500px",
             position: "absolute",
-            height: "-webkit-calc(100% - 48px)",
+            height: "-webkit-calc(100% - 21px)",
             width: "-webkit-calc(100% - 430px)",
             right: "45px",
-            border: "3px solid #000000"
+            border: "3px solid black"
         };
+
+        private MapBottomCSS: React.CSSProperties = {
+            minWidth: "545px",
+            position: "fixed",
+            width: "-webkit-calc(100% - 379px)",
+            height: "15px",
+            bottom: "0px",
+            right: "0px",
+            backgroundColor: "black",
+        }
+
+        private MapRightCSS: React.CSSProperties = {
+            position: "fixed",
+            width: "45px",
+            height: "-webkit-calc(100% - 13px)",
+            bottom: "auto",
+            right: "0px",
+            backgroundColor: "black",
+            zIndex: -1,
+        }
 
         public render() {
             return [
-                <div id="Map" style={this.MapCSS}></div>
+                <div id="Map" style={this.MapCSS}></div>,
+                <div id="MapBottom" style={this.MapBottomCSS}></div>,
+                <div id="MapRight" style={this.MapRightCSS}></div>
             ];
         }
 
         componentDidMount() {
+            window.onresize = () => {
+                if (window.innerWidth < 985) {
+                    document.getElementById("Map").style.right = String(45 - (985 - window.innerWidth) + 1 + "px");
+                } else {
+                    document.getElementById("Map").style.right = "45px"
+                }
+            }
             this.MainMap = new MapShow("Map");
         }
     }
