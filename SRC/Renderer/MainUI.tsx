@@ -140,7 +140,11 @@ export module MainPageUI {
     class FootTitle extends React.Component<footTitleProps, footTileState> {
         timerID: NodeJS.Timeout;
         deviceList: Array<number>;
-        deviceListElement: Array<JSX.Element>;
+        DeviceListTitleCSS: React.CSSProperties = {
+            float: "none"!,
+            color: "#ffffff"
+        }
+        deviceListElement: Array<JSX.Element> = new Array<JSX.Element>();
         constructor(props) {
             super(props);
             this.state = { DeviceCount: 0, deviceListIsShow: false }
@@ -150,6 +154,20 @@ export module MainPageUI {
         componentDidMount() {
             this.timerID = setInterval(() => {
                 this.setState({ DeviceCount: server.getUseableID().length });
+                this.deviceListElement = Array<JSX.Element>();
+                this.deviceList = server.getUseableID();
+                for (let index = 0; index < this.deviceList.length; index++) {
+                    this.deviceListElement.push(
+                        <li>
+                            <a href="#">
+                                <div id="deviceId">DeviceID:  {this.deviceList[index]}<br />
+                                    <div id="deviceType">[Unkown]</div>
+                                    <i className="fa fa-battery-half" aria-hidden="true"></i>
+                                </div>
+                            </a>
+                        </li>
+                    );
+                }
             }, 1000)
         }
 
@@ -159,29 +177,27 @@ export module MainPageUI {
             } else if (!this.state.deviceListIsShow) {
                 this.setState({ deviceListIsShow: true })
             }
-            this.deviceList = server.getUseableID();
-            for (let index = 0; index < this.deviceList.length; index++) {
-                this.deviceListElement.push(<li>
-                    <a href="#">
-                        <span>{this.deviceList[index]}</span>
-                    </a>
-                </li>);
-            }
         }
 
         public render(): JSX.Element {
             return (
                 <div id="footBar">
-                    <div className="deviceListShot" style={{ width: this.state.deviceListIsShow ? "250px" : "0" }}>
+                    <div className="deviceListShot" style={{ height: this.state.deviceListIsShow ? "400px" : "0" }}>
                         <div id="deviceList">
+                            <div id="deviceListHeader">
+                                <i className="fa fa-search" aria-hidden="true"></i>
+                                <input type="text" placeholder="Search"></input>
+                                <a href="#"><i className="fa fa-plus-square" aria-hidden="true"></i></a>
+                            </div>
                             <ul>
+                                <div id="deviceListNone">Current not have any device</div>
                                 {this.deviceListElement}
                             </ul>
                         </div>
                     </div>
-                    <div id="footName"> ACCSS by TSKangetsu </div>
-                    <div id="footVersion"> Version  0.0.1-Beta </div>
-                    <a href="#" onClick={this.showDeviceList} id="footDevice">Connected_Device:{this.state.DeviceCount}</a>
+                    <a href="#" id="footName"> ACCSS by TSKangetsu </a>
+                    <a href="#" id="footVersion"> Version  0.0.1-Beta </a>
+                    <a href="#" onClick={this.showDeviceList} id="footDevice">Connected Device:{this.state.DeviceCount}</a>
                 </div>
             );
         }
@@ -259,7 +275,7 @@ export module MainPageUI {
         private Gryochart: EchartShowSys;
         private SensorRTChartCSS: React.CSSProperties = {
             backgroundColor: "rgb(253, 253, 253)",
-            paddingTop: "43px",
+            top: "43px",
             height: "250px",
             width: "50%"
         };
