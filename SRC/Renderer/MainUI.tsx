@@ -205,7 +205,8 @@ export module MainPageUI {
     class FlyingMonitorComponent extends React.Component {
         public render() {
             return [
-                <Map />
+                <Map />,
+                <GLRTShow />
             ];
         }
     }
@@ -232,51 +233,49 @@ export module MainPageUI {
     class Map extends React.Component {
         //height为不安定要素，bug难以复现，须注意
         MainMap: MapShow;
-        private MapCSS: React.CSSProperties = {
-            minWidth: "500px",
+
+        private MapMainCSS: React.CSSProperties = {
             position: "absolute",
-            height: "-webkit-calc(100% - 21px)",
-            width: "-webkit-calc(100% - 430px)",
-            right: "45px",
+            height: "-webkit-calc(100% - 6px)",
+            width: "-webkit-calc(100% - 380px)",
+            right: "0px",
             border: "3px solid black"
         };
 
-        private MapBottomCSS: React.CSSProperties = {
-            minWidth: "545px",
-            position: "fixed",
-            width: "-webkit-calc(100% - 379px)",
-            height: "15px",
-            bottom: "0px",
-            right: "0px",
-            backgroundColor: "black",
-        }
+        private MapCSS: React.CSSProperties = {
+            height: "-webkit-calc(100% - 20px)",
+            width: "-webkit-calc(100% - 45px)",
+            top: "0",
+            left: "0"
+        };
 
         private MapRightCSS: React.CSSProperties = {
-            position: "fixed",
+            position: "absolute",
             width: "45px",
-            height: "-webkit-calc(100% - 13px)",
-            bottom: "auto",
-            right: "0px",
+            height: "-webkit-calc(100% - 20px)",
             backgroundColor: "black",
+            right: "0",
+            top: "0",
             zIndex: -1,
+        }
+
+        private MapBottomCSS: React.CSSProperties = {
+            width: "100%",
+            height: "20px",
+            bottom: "0px",
+            backgroundColor: "black",
         }
 
         public render() {
             return [
-                <div id="Map" style={this.MapCSS}></div>,
-                <div id="MapBottom" style={this.MapBottomCSS}></div>,
-                <div id="MapRight" style={this.MapRightCSS}></div>
+                <div id="MapArea" style={this.MapMainCSS}>
+                    <div id="Map" style={this.MapCSS}></div><div id="MapRight" style={this.MapRightCSS}></div>
+                    <div id="MapBottom" style={this.MapBottomCSS}></div>
+                </div>
             ];
         }
 
         componentDidMount() {
-            window.onresize = () => {
-                if (window.innerWidth < 985) {
-                    document.getElementById("Map").style.right = String(45 - (985 - window.innerWidth) + 1 + "px");
-                } else {
-                    document.getElementById("Map").style.right = "45px"
-                }
-            }
             this.MainMap = new MapShow("Map");
         }
     }
@@ -372,8 +371,12 @@ export module MainPageUI {
 
     class GLRTShow extends React.Component {
         private GLRTMainCSS: React.CSSProperties = {
+            position: "absolute",
+            minWidth: "350px",
             width: "350px",
-            height: "260px"
+            height: "260px",
+            top: "0",
+            left: "0"
         }
 
         public render() {
