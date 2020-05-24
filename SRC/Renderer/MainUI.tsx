@@ -198,7 +198,6 @@ export module MainPageUI {
     }
 
     //=================================================================================================================================//
-
     class FlyingMonitorComponent extends React.Component {
         public render() {
             return (
@@ -230,19 +229,33 @@ export module MainPageUI {
             )
         }
     }
-
     //=================================================================================================================================//
 
-    class Map extends React.Component {
+    interface MapProps {
+
+    }
+
+    interface MapState {
+        lat: Number;
+        lng: Number;
+    }
+
+    class Map extends React.Component<MapProps, MapState>{
         //height为不安定要素，bug难以复现，须注意
         MainMap: MapShow;
+        Position: Array<Number> = new Array<Number>();
+
+        constructor(props) {
+            super(props);
+            this.state = { lat: 0.0000000000, lng: 0.0000000000 };
+        }
 
         private MapMainCSS: React.CSSProperties = {
             position: "absolute",
             height: "-webkit-calc(100% - 6px)",
-            width: "-webkit-calc(100% - 380px)",
+            width: "-webkit-calc(100% - 330px)",
             right: "0px",
-            border: "3px solid black"
+            border: "3px solid #2e2e2e"
         };
 
         private MapCSS: React.CSSProperties = {
@@ -256,25 +269,42 @@ export module MainPageUI {
             position: "absolute",
             width: "45px",
             height: "-webkit-calc(100% - 20px)",
-            backgroundColor: "black",
+            backgroundColor: "#2e2e2e",
             right: "0",
             top: "0",
             zIndex: -1,
+            border: "1px solid white"
         }
 
         private MapBottomCSS: React.CSSProperties = {
             width: "100%",
             height: "20px",
             bottom: "0px",
-            backgroundColor: "black",
+            backgroundColor: "#2e2e2e",
+            border: "1px solid white"
+        }
+
+        private MapBottomTG: React.CSSProperties = {
+
+            paddingLeft: "10px",
+            display: "inline-block",
+            color: "white",
+            fontSize: "10px"
         }
 
         public render() {
             return (
                 <>
                     <div id="MapArea" style={this.MapMainCSS}>
-                        <div id="Map" style={this.MapCSS}></div><div id="MapRight" style={this.MapRightCSS}></div>
-                        <div id="MapBottom" style={this.MapBottomCSS}></div>
+                        <div id="Map" style={this.MapCSS}></div>
+                        <div id="MapRight" style={this.MapRightCSS}></div>
+                        <div id="MapBottom" style={this.MapBottomCSS}>
+                            <div id="MapBottomTG">
+                                <div id="lat" style={this.MapBottomTG}> Lat:{this.state.lat.toFixed(8)}</div>
+                                <div id="lng" style={this.MapBottomTG}> lng:{this.state.lng.toFixed(8)}</div>
+                                <div id="Altitude" style={this.MapBottomTG}> Altitude: 0.00m</div>
+                            </div>
+                        </div>
                     </div>
                 </>
             )
@@ -282,6 +312,10 @@ export module MainPageUI {
 
         componentDidMount() {
             this.MainMap = new MapShow("Map");
+            this.MainMap.Map.addEventListener('move', () => {
+                this.Position = this.MainMap.getCurrentCenterPosition();
+                this.setState({ lat: this.Position[0], lng: this.Position[1] });
+            });
         }
     }
 
@@ -383,17 +417,19 @@ export module MainPageUI {
     class GLRTShow extends React.Component {
         private GLRTMainCSS: React.CSSProperties = {
             position: "absolute",
-            minWidth: "350px",
-            width: "350px",
-            height: "260px",
+            width: "323px",
+            height: "323px",
             top: "0",
-            left: "0"
+            left: "0",
+            backgroundColor: "pink"
         }
 
         public render() {
             return (
                 <>
-                    <div id="GLRT" style={this.GLRTMainCSS}></div>
+                    <div id="GLRT" style={this.GLRTMainCSS}>
+                        <canvas id="glCanvas" style={{ width: "322px", height: "322px" }}></canvas>
+                    </div>
                 </>
             );
         }
