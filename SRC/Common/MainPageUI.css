@@ -33,7 +33,19 @@ body {
     overflow: auto !important;
 }
 
+
+@media screen and (max-width:955px) {
+    #MapRight {
+        width: 0px !important;
+    }
+
+    #Map {
+        width: 100% !important;
+    }
+}
+
 #MainPageArea {
+    height: -webkit-calc(100% - 18px);
     margin-left: 55px;
     transition: margin-left 0.2s linear;
     -webkit-transition: margin-left 0.2s linear;
