@@ -259,8 +259,8 @@ export module MainPageUI {
         };
 
         private MapCSS: React.CSSProperties = {
-            height: "-webkit-calc(100% - 20px)",
-            width: "-webkit-calc(100% - 45px)",
+            height: "-webkit-calc(100% - 23px)",
+            width: "-webkit-calc(100% - 47px)",
             top: "0",
             left: "0"
         };
@@ -272,11 +272,17 @@ export module MainPageUI {
             backgroundColor: "#2e2e2e",
             right: "0",
             top: "0",
-            zIndex: -1,
             border: "1px solid white"
         }
 
+        private MapRightTG: React.CSSProperties = {
+            WebkitAppearance: "slider-vertical",
+            width: "38px",
+            height: "100%",
+        }
+
         private MapBottomCSS: React.CSSProperties = {
+            position: "absolute",
             width: "100%",
             height: "20px",
             bottom: "0px",
@@ -285,7 +291,6 @@ export module MainPageUI {
         }
 
         private MapBottomTG: React.CSSProperties = {
-
             paddingLeft: "10px",
             display: "inline-block",
             color: "white",
@@ -297,9 +302,13 @@ export module MainPageUI {
                 <>
                     <div id="MapArea" style={this.MapMainCSS}>
                         <div id="Map" style={this.MapCSS}></div>
-                        <div id="MapRight" style={this.MapRightCSS}></div>
+                        <div id="MapRight" style={this.MapRightCSS}>
+                            <div id="con">
+                                <input type="range" min="0" max="100" step="5" style={this.MapRightTG} />
+                            </div>
+                        </div>
                         <div id="MapBottom" style={this.MapBottomCSS}>
-                            <div id="MapBottomTG">
+                            <div id="MapBottomTG" style={{ width: "100%", height: "100%" }}>
                                 <div id="lat" style={this.MapBottomTG}> Lat:{this.state.lat.toFixed(8)}</div>
                                 <div id="lng" style={this.MapBottomTG}> lng:{this.state.lng.toFixed(8)}</div>
                                 <div id="Altitude" style={this.MapBottomTG}> Altitude: 0.00m</div>
@@ -415,6 +424,7 @@ export module MainPageUI {
     }
 
     class GLRTShow extends React.Component {
+        canvasElement: WebGLRenderingContext;
         private GLRTMainCSS: React.CSSProperties = {
             position: "absolute",
             width: "323px",
@@ -432,6 +442,12 @@ export module MainPageUI {
                     </div>
                 </>
             );
+        }
+
+        componentDidMount() {
+            this.canvasElement = (document.getElementById("glCanvas") as HTMLCanvasElement).getContext("webgl");
+            this.canvasElement.clearColor(0.0, 0.0, 0.0, 1.0);
+            this.canvasElement.clear(this.canvasElement.COLOR_BUFFER_BIT);
         }
     }
 }
