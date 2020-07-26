@@ -1,0 +1,53 @@
+@media screen and (max-width:955px) {
+    #MapRight {
+        width: 0px !important;
+    }
+
+    #Map {
+        width: 100% !important;
+    }
+
+    #con {
+        padding-left: 0 !important;
+    }
+
+    #con input {
+        display: none;
+    }
+}
+
+@media screen and (max-height: 700px) {
+    #MapVideoArea {
+        height: 70% !important;
+    }
+
+    #title {
+        height: 60px !important;
+    }
+
+    .BarmenuShot {
+        top: 60px !important;
+    }
+
+    #root {
+        height: -webkit-calc(100% - 65px) !important;
+    }
+}
+
+@media screen and (max-height: 600px) {
+    #MapVideoArea {
+        height: 75% !important;
+    }
+
+    #title {
+        height: 45px !important;
+    }
+
+    .BarmenuShot {
+        top: 45px !important;
+    }
+
+    #root {
+        height: -webkit-calc(100% - 45px) !important;
+    }
+}

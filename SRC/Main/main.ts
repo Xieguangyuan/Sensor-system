@@ -9,7 +9,7 @@ function createWindow() {
         height: 600,
         minWidth: 955,
         minHeight: 600,
-        autoHideMenuBar: false,
+        autoHideMenuBar: true,
         title: "Accss - Electron Autopilot controller",
         webPreferences: {
             nodeIntegration: true

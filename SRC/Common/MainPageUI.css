@@ -22,7 +22,7 @@ body {
 }
 
 #title {
-    background-color: dimgrey;
+    background-color: #916dd5;
     height: 75px;
     width: 100%;
 }
@@ -31,25 +31,7 @@ body {
     height: -webkit-calc(100% - 75px);
     width: 100%;
     overflow: auto !important;
-}
-
-
-@media screen and (max-width:955px) {
-    #MapRight {
-        width: 0px !important;
-    }
-
-    #Map {
-        width: 100% !important;
-    }
-
-    #con {
-        padding-left: 0 !important;
-    }
-
-    #con input {
-        display: none;
-    }
+    background-color: #f0e3ff;
 }
 
 #con {

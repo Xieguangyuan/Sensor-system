@@ -35,7 +35,8 @@
     "electron-webpack": "^2.8.2",
     "ts-loader": "^7.0.4",
     "typescript": "^3.8.3",
-    "webpack": "^4.43.0"
+    "webpack": "^4.43.0",
+    "file-loader": "^6.0.0"
   },
   "dependencies": {
     "echarts": "^4.7.0",

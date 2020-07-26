@@ -5,6 +5,7 @@ import * as ps from 'child_process'
 import { MapShow } from './MapShow'
 import { EchartShowSys } from './EchartsShow'
 import { NetServerMain } from './SocketComu'
+const NoSignal = require("../Common/IMG/no-signal.jpg")
 
 export module MainPageUI {
     let JSONConfig: any;
@@ -199,11 +200,20 @@ export module MainPageUI {
 
     //=================================================================================================================================//
     class FlyingMonitorComponent extends React.Component {
+        MapVideoAreaCSS: React.CSSProperties = {
+            position: "absolute",
+            width: "100%",
+            height: "65%"
+        }
+
         public render() {
             return (
                 <>
-                    <Map />
-                    <GLRTShow />
+                    <div id="MapVideoArea" style={this.MapVideoAreaCSS}>
+                        <Map />
+                        <VideoShowArea />
+                    </div>
+
                 </>
             );
         }
@@ -214,7 +224,6 @@ export module MainPageUI {
             return (
                 <>
                     <SensorRTChart />
-                    <CVShowArea />
                 </>
             );
         }
@@ -241,7 +250,6 @@ export module MainPageUI {
     }
 
     class Map extends React.Component<MapProps, MapState>{
-        //height为不安定要素，bug难以复现，须注意
         MainMap: MapShow;
         Position: Array<Number> = new Array<Number>();
 
@@ -252,10 +260,10 @@ export module MainPageUI {
 
         private MapMainCSS: React.CSSProperties = {
             position: "absolute",
-            height: "-webkit-calc(100% - 6px)",
-            width: "-webkit-calc(100% - 330px)",
-            right: "0px",
-            border: "3px solid #2e2e2e"
+            height: "100%",
+            width: "50%",
+            left: "0px",
+            border: "3px solid #d89cf6"
         };
 
         private MapCSS: React.CSSProperties = {
@@ -269,7 +277,7 @@ export module MainPageUI {
             position: "absolute",
             width: "45px",
             height: "-webkit-calc(100% - 20px)",
-            backgroundColor: "#2e2e2e",
+            backgroundColor: "#3e206d",
             right: "0",
             top: "0",
             border: "1px solid white"
@@ -286,7 +294,7 @@ export module MainPageUI {
             width: "100%",
             height: "20px",
             bottom: "0px",
-            backgroundColor: "#2e2e2e",
+            backgroundColor: "#3e206d",
             border: "1px solid white"
         }
 
@@ -325,6 +333,79 @@ export module MainPageUI {
                 this.Position = this.MainMap.getCurrentCenterPosition();
                 this.setState({ lat: this.Position[0], lng: this.Position[1] });
             });
+        }
+
+        componentWillUnmount() {
+            this.MainMap.Map.clearAllEventListeners();
+        }
+    }
+
+    interface VideoShowAreaProps {
+
+    }
+
+    interface VideoShowAreaState {
+        IMGSRC: any;
+        IsSRCErrored: boolean;
+    }
+
+    class VideoShowArea extends React.Component<VideoShowAreaProps, VideoShowAreaState> {
+        VideoShowAreaCSS: React.CSSProperties = {
+            position: "absolute",
+            width: '-webkit-calc(50% - 9px)',
+            height: '100%',
+            marginLeft: "3px",
+            left: "50%",
+            border: "3px solid #d89cf6"
+        }
+        constructor(props) {
+            super(props);
+            this.MJPEGServerINIT();
+            this.state = {
+                IMGSRC: JSONConfig.renderMJPEGServerSRC,
+                IsSRCErrored: false
+            }
+            this.MJPEGServerOnError = this.MJPEGServerOnError.bind(this);
+        }
+
+
+        public render() {
+            return (
+                <>
+                    <div id="VideoShowArea" style={this.VideoShowAreaCSS}>
+                        <img id="VideoShow" onError={this.MJPEGServerOnError} src={this.state.IMGSRC}></img>
+                    </div>
+                </>
+            );
+        }
+
+        MJPEGServerOnError() {
+            if (!this.state.IsSRCErrored) {
+                this.setState({
+                    IMGSRC: String(NoSignal),
+                    IsSRCErrored: true
+                })
+            }
+        }
+
+        MJPEGServerINIT() {
+            ps.exec(JSONConfig.renderMJPEGServerBinWin + " -f='192.168.137.240' -fp=10086 ", (error, stdout, stderr) => {
+                if (error) {
+                    console.log(`error: ${error.message}`);
+                    return;
+                }
+                if (stderr) {
+                    console.log(`stderr: ${stderr}`);
+                    return;
+                }
+                console.log(`stdout: ${stdout}`);
+            });
+        }
+
+        componentWillUnmount() {
+            //windows Only
+            ps.spawn("taskkill", ["/F", "/IM", "ACCSSVideoServer.exe"]);
+            document.getElementById("VideoShow").setAttribute("src", "");
         }
     }
 
@@ -390,38 +471,6 @@ export module MainPageUI {
         }
     }
 
-    class CVShowArea extends React.Component {
-        serverProcess: ps.ChildProcess;
-
-        public render() {
-            this.MJPEGServerINIT();
-            return (
-                <>
-                    <img id="myImage" src={JSONConfig.renderMJPEGServerSRC}></img>
-                </>
-            );
-        }
-
-        MJPEGServerINIT() {
-            this.serverProcess = ps.exec(JSONConfig.renderMJPEGServerBinWin + " -f='192.168.137.240' -fp=10086 ", (error, stdout, stderr) => {
-                if (error) {
-                    console.log(`error: ${error.message}`);
-                    return;
-                }
-                if (stderr) {
-                    console.log(`stderr: ${stderr}`);
-                    return;
-                }
-                console.log(`stdout: ${stdout}`);
-            });
-        }
-
-        componentWillUnmount() {
-            //windows Only
-            ps.spawn("taskkill", ["/F", "/IM", "ACCSSVideoServer.exe"]);
-            document.getElementById("myImage").setAttribute("src", "");
-        }
-    }
 
     class GLRTShow extends React.Component {
         canvasElement: WebGLRenderingContext;
