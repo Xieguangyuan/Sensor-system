@@ -5,7 +5,7 @@ import * as ps from 'child_process'
 import { MapShow } from './MapShow'
 import { EchartShowSys } from './EchartsShow'
 import { NetServerMain } from './SocketComu'
-const NoSignal = require("../Common/IMG/no-signal.jpg")
+import NoSignal from '../Common/IMG/no-signal.jpg';
 
 export module MainPageUI {
     let JSONConfig: any;
@@ -351,13 +351,18 @@ export module MainPageUI {
 
     class VideoShowArea extends React.Component<VideoShowAreaProps, VideoShowAreaState> {
         VideoShowAreaCSS: React.CSSProperties = {
+            display: "flex",
             position: "absolute",
             width: '-webkit-calc(50% - 9px)',
             height: '100%',
             marginLeft: "3px",
             left: "50%",
-            border: "3px solid #d89cf6"
+            border: "3px solid #d89cf6",
+            backgroundColor: "black",
+            justifyContent: "center",
+            alignItems: "center"
         }
+
         constructor(props) {
             super(props);
             this.MJPEGServerINIT();
@@ -382,7 +387,7 @@ export module MainPageUI {
         MJPEGServerOnError() {
             if (!this.state.IsSRCErrored) {
                 this.setState({
-                    IMGSRC: String(NoSignal),
+                    IMGSRC: NoSignal,
                     IsSRCErrored: true
                 })
             }
