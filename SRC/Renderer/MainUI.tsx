@@ -213,7 +213,6 @@ export module MainPageUI {
                         <Map />
                         <VideoShowArea />
                     </div>
-
                 </>
             );
         }
@@ -414,40 +413,128 @@ export module MainPageUI {
         }
     }
 
-    class SensorRTChart extends React.Component {
+    interface SensorRTChartProps {
+
+    }
+
+    interface SensorRTChartState {
+        DataUpdateFreq: number;
+        DataSource: string;
+        DataPitch: number;
+        DataRoll: number;
+        DataYaw: number;
+    }
+
+    class SensorRTChart extends React.Component<SensorRTChartProps, SensorRTChartState> {
         private GryoYaw: number;
         private GryoRoll: number;
         private GryoPitch: number;
-        private TimerID: NodeJS.Timeout;
+        private DataUpdateTimer: NodeJS.Timeout;
+        private ChartResizeTimer: NodeJS.Timeout;
         private Gryochart: EchartShowSys;
+        private SensorChartArea: React.CSSProperties = {
+            position: "absolute",
+            top: "15px",
+            left: "50%",
+            height: "300px",
+            width: "98%",
+            border: "3px solid #916dd5",
+            borderRadius: "10px",
+            transform: "translate(-50%,0)"
+        }
         private SensorRTChartCSS: React.CSSProperties = {
-            backgroundColor: "rgb(253, 253, 253)",
-            top: "43px",
+            top: "50%",
+            left: "200px",
+            transform: "translate(0,-50%)",
             height: "250px",
-            width: "50%"
+            width: "-webkit-calc(100% - 400px)"
         };
+        private SensorDataCSS: React.CSSProperties = {
+            position: "absolute",
+            top: "0",
+            left: "0",
+            width: "189px",
+            height: "300px",
+            backgroundColor: "gray"
+        }
+
+        constructor(props) {
+            super(props);
+            this.HandleDataShowType = this.HandleDataShowType.bind(this);
+            this.state = { DataUpdateFreq: 100, DataSource: "Gryo", DataPitch: 0, DataRoll: 0, DataYaw: 0 }
+        }
+
 
         public render() {
             return (
                 <>
-                    <div id='SensorRTChart' style={this.SensorRTChartCSS}></div>
+                    <div id="SensorChartArea" style={this.SensorChartArea}>
+                        <div id="SensorDataShow" style={this.SensorDataCSS}>
+                            <div id="SensorDataShowType" style={{ position: "absolute", top: "50px" }}>
+                                <div style={{ position: "absolute", left: "5px", top: "15px", width: "175px", height: "20px" }}>
+                                    <div style={{ position: "absolute", fontSize: "12px", textAlign: "center" }}>DataSource:</div>
+                                    <select name="ChartType" id="ChartType" style={{ position: "absolute", right: "0", width: "100px", height: "20px", borderRadius: "5px" }} onChange={this.HandleDataShowType}>
+                                        <option value="Gryo">Gryo</option>
+                                        <option value="Accel">Accel</option>
+                                        <option value="RealAngle">RealAngle</option>
+                                    </select>
+                                </div>
+                                <div style={{ position: "absolute", left: "5px", top: "50px", width: "175px", height: "20px" }}>
+                                    <div style={{ position: "absolute", fontSize: "12px", textAlign: "center" }}> Pitch: </div>
+                                    <div style={{ position: "absolute", right: "0", width: "100px", height: "20px", backgroundColor: "pink", borderRadius: "5px" }}>{this.state.DataPitch}</div>
+                                </div>
+                                <div style={{ position: "absolute", left: "5px", top: "85px", width: "175px", height: "20px" }}>
+                                    <div style={{ position: "absolute", fontSize: "12px", textAlign: "center" }}> Roll : </div>
+                                    <div style={{ position: "absolute", right: "0", width: "100px", height: "20px", backgroundColor: "pink", borderRadius: "5px" }}>{this.state.DataPitch}</div>
+                                </div>
+                                <div style={{ position: "absolute", left: "5px", top: "120px", width: "175px", height: "20px" }}>
+                                    <div style={{ position: "absolute", fontSize: "12px", textAlign: "center" }}> Yaw  : </div>
+                                    <div style={{ position: "absolute", right: "0", width: "100px", height: "20px", backgroundColor: "pink", borderRadius: "5px" }}>{this.state.DataPitch}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id='SensorRTChart' style={this.SensorRTChartCSS}></div>
+                    </div>
                 </>
             );
         }
 
+        HandleDataShowType(event: React.ChangeEvent<HTMLSelectElement>) {
+            if (event.target.value == "Gryo") {
+                this.setState({ DataSource: event.target.value });
+            } else if (event.target.value == "Accel") {
+                this.setState({ DataSource: event.target.value });
+            } else if (event.target.value == "RealAngle") {
+                this.setState({ DataSource: event.target.value });
+            }
+        }
+
         componentDidMount() {
             this.SensorRTChartInit();
-            window.onresize = () => this.Gryochart.EchartAreaUpdate();
-            this.TimerID = setInterval(() => {
-                this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[1][2]), this.GryoPitch);
-                this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[1][3]), this.GryoRoll);
-                this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[1][4]), this.GryoYaw);
-            }, 100);
+            this.DataUpdateTimer = setInterval(() => {
+                if (this.state.DataSource == "Gryo") {
+                    this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[1][2]), this.GryoPitch);
+                    this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[1][3]), this.GryoRoll);
+                    this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[1][4]), this.GryoYaw);
+                    this.setState({
+                        DataYaw: Number(server.deviceRTDataBuffer[1][4]),
+                        DataRoll: Number(server.deviceRTDataBuffer[1][3]),
+                        DataPitch: Number(server.deviceRTDataBuffer[1][2])
+                    });
+                } else if (this.state.DataSource == "Accel") {
+
+                } else if (this.state.DataSource == "RealAngle") {
+
+                }
+            }, this.state.DataUpdateFreq);
+            this.ChartResizeTimer = setInterval(() => {
+                this.Gryochart.EchartAreaUpdate();
+            }, 100)
         }
 
         componentWillUnmount() {
-            window.onresize = null;
-            clearInterval(this.TimerID);
+            clearInterval(this.DataUpdateTimer);
+            clearInterval(this.ChartResizeTimer);
         }
 
         private SensorRTChartInit() {
