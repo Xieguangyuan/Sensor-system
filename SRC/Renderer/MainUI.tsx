@@ -5,6 +5,9 @@ import * as ps from 'child_process'
 import { MapShow } from './MapShow'
 import { EchartShowSys } from './EchartsShow'
 import { NetServerMain } from './SocketComu'
+import '../Common/FlyingMonitor.css'
+import '../Common/DroneStatus.css'
+import NoSignal from '../Common/IMG/no-signal.jpg';
 
 export module MainPageUI {
     let JSONConfig: any;
@@ -198,13 +201,14 @@ export module MainPageUI {
     }
 
     //=================================================================================================================================//
-
     class FlyingMonitorComponent extends React.Component {
         public render() {
             return (
                 <>
-                    <Map />
-                    <GLRTShow />
+                    <div id="MapVideoArea">
+                        <Map />
+                        <VideoShowArea />
+                    </div>
                 </>
             );
         }
@@ -215,7 +219,6 @@ export module MainPageUI {
             return (
                 <>
                     <SensorRTChart />
-                    <CVShowArea />
                 </>
             );
         }
@@ -230,51 +233,43 @@ export module MainPageUI {
             )
         }
     }
-
     //=================================================================================================================================//
 
-    class Map extends React.Component {
-        //height为不安定要素，bug难以复现，须注意
+    interface MapProps {
+
+    }
+
+    interface MapState {
+        lat: Number;
+        lng: Number;
+    }
+
+    class Map extends React.Component<MapProps, MapState>{
         MainMap: MapShow;
+        Position: Array<Number> = new Array<Number>();
 
-        private MapMainCSS: React.CSSProperties = {
-            position: "absolute",
-            height: "-webkit-calc(100% - 6px)",
-            width: "-webkit-calc(100% - 380px)",
-            right: "0px",
-            border: "3px solid black"
-        };
-
-        private MapCSS: React.CSSProperties = {
-            height: "-webkit-calc(100% - 20px)",
-            width: "-webkit-calc(100% - 45px)",
-            top: "0",
-            left: "0"
-        };
-
-        private MapRightCSS: React.CSSProperties = {
-            position: "absolute",
-            width: "45px",
-            height: "-webkit-calc(100% - 20px)",
-            backgroundColor: "black",
-            right: "0",
-            top: "0",
-            zIndex: -1,
-        }
-
-        private MapBottomCSS: React.CSSProperties = {
-            width: "100%",
-            height: "20px",
-            bottom: "0px",
-            backgroundColor: "black",
+        constructor(props) {
+            super(props);
+            this.state = { lat: 0.0000000000, lng: 0.0000000000 };
         }
 
         public render() {
             return (
                 <>
-                    <div id="MapArea" style={this.MapMainCSS}>
-                        <div id="Map" style={this.MapCSS}></div><div id="MapRight" style={this.MapRightCSS}></div>
-                        <div id="MapBottom" style={this.MapBottomCSS}></div>
+                    <div id="MapArea">
+                        <div id="Map"></div>
+                        <div id="MapRight">
+                            <div id="con">
+                                <input type="range" min="0" max="100" step="5" />
+                            </div>
+                        </div>
+                        <div id="MapBottom">
+                            <div id="MapBottomTG" style={{ width: "100%", height: "100%" }}>
+                                <div id="lat"> Lat:{this.state.lat.toFixed(8)}</div>
+                                <div id="lng"> lng:{this.state.lng.toFixed(8)}</div>
+                                <div id="Altitude"> Altitude: 0.00m</div>
+                            </div>
+                        </div>
                     </div>
                 </>
             )
@@ -282,43 +277,180 @@ export module MainPageUI {
 
         componentDidMount() {
             this.MainMap = new MapShow("Map");
+            this.MainMap.Map.addEventListener('move', () => {
+                this.Position = this.MainMap.getCurrentCenterPosition();
+                this.setState({ lat: this.Position[0], lng: this.Position[1] });
+            });
+        }
+
+        componentWillUnmount() {
+            this.MainMap.Map.clearAllEventListeners();
         }
     }
 
-    class SensorRTChart extends React.Component {
-        private GryoYaw: number;
-        private GryoRoll: number;
-        private GryoPitch: number;
-        private TimerID: NodeJS.Timeout;
-        private Gryochart: EchartShowSys;
-        private SensorRTChartCSS: React.CSSProperties = {
-            backgroundColor: "rgb(253, 253, 253)",
-            top: "43px",
-            height: "250px",
-            width: "50%"
-        };
+    interface VideoShowAreaProps {
+
+    }
+
+    interface VideoShowAreaState {
+        IMGSRC: any;
+        IsSRCErrored: boolean;
+    }
+
+    class VideoShowArea extends React.Component<VideoShowAreaProps, VideoShowAreaState> {
+        constructor(props) {
+            super(props);
+            this.MJPEGServerINIT();
+            this.state = {
+                IMGSRC: JSONConfig.renderMJPEGServerSRC,
+                IsSRCErrored: false
+            }
+            this.MJPEGServerOnError = this.MJPEGServerOnError.bind(this);
+        }
+
 
         public render() {
             return (
                 <>
-                    <div id='SensorRTChart' style={this.SensorRTChartCSS}></div>
+                    <div id="VideoShowArea">
+                        <img id="VideoShow" onError={this.MJPEGServerOnError} src={this.state.IMGSRC}></img>
+                    </div>
                 </>
             );
         }
 
-        componentDidMount() {
-            this.SensorRTChartInit();
-            window.onresize = () => this.Gryochart.EchartAreaUpdate();
-            this.TimerID = setInterval(() => {
-                this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[1][2]), this.GryoPitch);
-                this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[1][3]), this.GryoRoll);
-                this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[1][4]), this.GryoYaw);
-            }, 100);
+        MJPEGServerOnError() {
+            if (!this.state.IsSRCErrored) {
+                this.setState({
+                    IMGSRC: NoSignal,
+                    IsSRCErrored: true
+                })
+            }
+        }
+
+        MJPEGServerINIT() {
+            ps.exec(JSONConfig.renderMJPEGServerBinWin + " -f='192.168.137.240' -fp=10086 ", (error, stdout, stderr) => {
+                if (error) {
+                    console.log(`error: ${error.message}`);
+                    return;
+                }
+                if (stderr) {
+                    console.log(`stderr: ${stderr}`);
+                    return;
+                }
+                console.log(`stdout: ${stdout}`);
+            });
         }
 
         componentWillUnmount() {
-            window.onresize = null;
-            clearInterval(this.TimerID);
+            //windows Only
+            ps.spawn("taskkill", ["/F", "/IM", "ACCSSVideoServer.exe"]);
+            document.getElementById("VideoShow").setAttribute("src", "");
+        }
+    }
+
+    interface SensorRTChartProps {
+
+    }
+
+    interface SensorRTChartState {
+        DataUpdateFreq: number;
+        DataSource: string;
+        DataPitch: number;
+        DataRoll: number;
+        DataYaw: number;
+    }
+
+    class SensorRTChart extends React.Component<SensorRTChartProps, SensorRTChartState> {
+        private GryoYaw: number;
+        private GryoRoll: number;
+        private GryoPitch: number;
+        private ShowDevID: number = 0;
+        private DataUpdateTimer: NodeJS.Timeout;
+        private ChartResizeTimer: NodeJS.Timeout;
+        private Gryochart: EchartShowSys;
+
+        constructor(props) {
+            super(props);
+            this.HandleDataShowType = this.HandleDataShowType.bind(this);
+            this.state = { DataUpdateFreq: 100, DataSource: "Gryo", DataPitch: 0, DataRoll: 0, DataYaw: 0 }
+        }
+
+        public render() {
+            return (
+                <>
+                    <div id="SensorChartArea">
+                        <div id="SensorDataShow">
+                            <div id="SensorDataShowType" style={{ position: "absolute", top: "50px" }}>
+                                <div style={{ position: "absolute", left: "5px", top: "15px", width: "175px", height: "20px" }}>
+                                    <div style={{ position: "absolute", fontSize: "12px", textAlign: "center" }}>DataSource:</div>
+                                    <select name="ChartType" id="ChartType" style={{ position: "absolute", right: "0", width: "100px", height: "20px", borderRadius: "5px" }} onChange={this.HandleDataShowType}>
+                                        <option value="Gryo">Gryo</option>
+                                        <option value="Accel">Accel</option>
+                                        <option value="RealAngle">RealAngle</option>
+                                        <option value="Altitude">Altitude</option>
+                                    </select>
+                                </div>
+                                <div style={{ position: "absolute", left: "5px", top: "50px", width: "175px", height: "20px" }}>
+                                    <div style={{ position: "absolute", fontSize: "12px", textAlign: "center" }}> Pitch: </div>
+                                    <div style={{ position: "absolute", right: "0", width: "100px", height: "20px", backgroundColor: "pink", borderRadius: "5px" }}>{this.state.DataPitch}</div>
+                                </div>
+                                <div style={{ position: "absolute", left: "5px", top: "85px", width: "175px", height: "20px" }}>
+                                    <div style={{ position: "absolute", fontSize: "12px", textAlign: "center" }}> Roll : </div>
+                                    <div style={{ position: "absolute", right: "0", width: "100px", height: "20px", backgroundColor: "pink", borderRadius: "5px" }}>{this.state.DataPitch}</div>
+                                </div>
+                                <div style={{ position: "absolute", left: "5px", top: "120px", width: "175px", height: "20px" }}>
+                                    <div style={{ position: "absolute", fontSize: "12px", textAlign: "center" }}> Yaw  : </div>
+                                    <div style={{ position: "absolute", right: "0", width: "100px", height: "20px", backgroundColor: "pink", borderRadius: "5px" }}>{this.state.DataPitch}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id='SensorRTChart'></div>
+                    </div>
+                </>
+            );
+        }
+
+        HandleDataShowType(event: React.ChangeEvent<HTMLSelectElement>) {
+            if (event.target.value == "Gryo") {
+                this.setState({ DataSource: event.target.value });
+            } else if (event.target.value == "Accel") {
+                this.setState({ DataSource: event.target.value });
+            } else if (event.target.value == "RealAngle") {
+                this.setState({ DataSource: event.target.value });
+            } else if (event.target.value == "Altitude") {
+                this.setState({ DataSource: event.target.value });
+            }
+        }
+
+        componentDidMount() {
+            this.SensorRTChartInit();
+            this.DataUpdateTimer = setInterval(() => {
+                if (this.state.DataSource == "Gryo") {
+                    this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[this.ShowDevID][2]), this.GryoPitch);
+                    this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[this.ShowDevID][3]), this.GryoRoll);
+                    this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[this.ShowDevID][4]), this.GryoYaw);
+                    this.setState({
+                        DataYaw: Number(server.deviceRTDataBuffer[this.ShowDevID][4]),
+                        DataRoll: Number(server.deviceRTDataBuffer[this.ShowDevID][3]),
+                        DataPitch: Number(server.deviceRTDataBuffer[this.ShowDevID][2])
+                    });
+                } else if (this.state.DataSource == "Accel") {
+
+                } else if (this.state.DataSource == "RealAngle") {
+
+                } else if (this.state.DataSource == "Altitude") {
+
+                }
+            }, this.state.DataUpdateFreq);
+            this.ChartResizeTimer = setInterval(() => {
+                this.Gryochart.EchartAreaUpdate();
+            }, 100)
+        }
+
+        componentWillUnmount() {
+            clearInterval(this.DataUpdateTimer);
+            clearInterval(this.ChartResizeTimer);
         }
 
         private SensorRTChartInit() {
@@ -347,55 +479,32 @@ export module MainPageUI {
         }
     }
 
-    class CVShowArea extends React.Component {
-        serverProcess: ps.ChildProcess;
-
-        public render() {
-            this.MJPEGServerINIT();
-            return (
-                <>
-                    <img id="myImage" src={JSONConfig.renderMJPEGServerSRC}></img>
-                </>
-            );
-        }
-
-        MJPEGServerINIT() {
-            this.serverProcess = ps.exec(JSONConfig.renderMJPEGServerBinWin + " -f='192.168.137.240' -fp=10086 ", (error, stdout, stderr) => {
-                if (error) {
-                    console.log(`error: ${error.message}`);
-                    return;
-                }
-                if (stderr) {
-                    console.log(`stderr: ${stderr}`);
-                    return;
-                }
-                console.log(`stdout: ${stdout}`);
-            });
-        }
-
-        componentWillUnmount() {
-            //windows Only
-            ps.spawn("taskkill", ["/F", "/IM", "ACCSSVideoServer.exe"]);
-            document.getElementById("myImage").setAttribute("src", "");
-        }
-    }
 
     class GLRTShow extends React.Component {
+        canvasElement: WebGLRenderingContext;
         private GLRTMainCSS: React.CSSProperties = {
             position: "absolute",
-            minWidth: "350px",
-            width: "350px",
-            height: "260px",
+            width: "323px",
+            height: "323px",
             top: "0",
-            left: "0"
+            left: "0",
+            backgroundColor: "pink"
         }
 
         public render() {
             return (
                 <>
-                    <div id="GLRT" style={this.GLRTMainCSS}></div>
+                    <div id="GLRT" style={this.GLRTMainCSS}>
+                        <canvas id="glCanvas" style={{ width: "322px", height: "322px" }}></canvas>
+                    </div>
                 </>
             );
+        }
+
+        componentDidMount() {
+            this.canvasElement = (document.getElementById("glCanvas") as HTMLCanvasElement).getContext("webgl");
+            this.canvasElement.clearColor(0.0, 0.0, 0.0, 1.0);
+            this.canvasElement.clear(this.canvasElement.COLOR_BUFFER_BIT);
         }
     }
 }

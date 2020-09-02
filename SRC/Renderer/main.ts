@@ -1,5 +1,6 @@
 import '../Common/MainPageUI.css'
 import '../Common/BarmenuUI.css'
+import '../Common/ScreenAutoFix.css'
 import 'font-awesome/css/font-awesome.css'
 import { MainPageUI } from './MainUI'
 window.onload = function () {

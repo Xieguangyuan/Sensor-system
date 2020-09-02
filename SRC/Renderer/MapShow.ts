@@ -23,4 +23,11 @@ export class MapShow {
             this.MarkerID[TargetID].setLatLng([GPSTrackPositionX, GPSTrackPositionY]);
         }
     }
+
+    public getCurrentCenterPosition(): Array<Number> {
+        let tmp: Array<Number> = new Array<Number>();
+        tmp[0] = this.Map.getCenter().lat;
+        tmp[1] = this.Map.getCenter().lng;
+        return tmp;
+    }
 }
