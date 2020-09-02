@@ -5,6 +5,8 @@ import * as ps from 'child_process'
 import { MapShow } from './MapShow'
 import { EchartShowSys } from './EchartsShow'
 import { NetServerMain } from './SocketComu'
+import '../Common/FlyingMonitor.css'
+import '../Common/DroneStatus.css'
 import NoSignal from '../Common/IMG/no-signal.jpg';
 
 export module MainPageUI {
@@ -200,16 +202,10 @@ export module MainPageUI {
 
     //=================================================================================================================================//
     class FlyingMonitorComponent extends React.Component {
-        MapVideoAreaCSS: React.CSSProperties = {
-            position: "absolute",
-            width: "100%",
-            height: "65%"
-        }
-
         public render() {
             return (
                 <>
-                    <div id="MapVideoArea" style={this.MapVideoAreaCSS}>
+                    <div id="MapVideoArea">
                         <Map />
                         <VideoShowArea />
                     </div>
@@ -257,68 +253,21 @@ export module MainPageUI {
             this.state = { lat: 0.0000000000, lng: 0.0000000000 };
         }
 
-        private MapMainCSS: React.CSSProperties = {
-            position: "absolute",
-            height: "100%",
-            width: "50%",
-            left: "0px",
-            border: "3px solid #d89cf6"
-        };
-
-        private MapCSS: React.CSSProperties = {
-            height: "-webkit-calc(100% - 23px)",
-            width: "-webkit-calc(100% - 47px)",
-            top: "0",
-            left: "0"
-        };
-
-        private MapRightCSS: React.CSSProperties = {
-            position: "absolute",
-            width: "45px",
-            height: "-webkit-calc(100% - 20px)",
-            backgroundColor: "#3e206d",
-            right: "0",
-            top: "0",
-            border: "1px solid white"
-        }
-
-        private MapRightTG: React.CSSProperties = {
-            WebkitAppearance: "slider-vertical",
-            width: "38px",
-            height: "100%",
-        }
-
-        private MapBottomCSS: React.CSSProperties = {
-            position: "absolute",
-            width: "100%",
-            height: "20px",
-            bottom: "0px",
-            backgroundColor: "#3e206d",
-            border: "1px solid white"
-        }
-
-        private MapBottomTG: React.CSSProperties = {
-            paddingLeft: "10px",
-            display: "inline-block",
-            color: "white",
-            fontSize: "10px"
-        }
-
         public render() {
             return (
                 <>
-                    <div id="MapArea" style={this.MapMainCSS}>
-                        <div id="Map" style={this.MapCSS}></div>
-                        <div id="MapRight" style={this.MapRightCSS}>
+                    <div id="MapArea">
+                        <div id="Map"></div>
+                        <div id="MapRight">
                             <div id="con">
-                                <input type="range" min="0" max="100" step="5" style={this.MapRightTG} />
+                                <input type="range" min="0" max="100" step="5" />
                             </div>
                         </div>
-                        <div id="MapBottom" style={this.MapBottomCSS}>
+                        <div id="MapBottom">
                             <div id="MapBottomTG" style={{ width: "100%", height: "100%" }}>
-                                <div id="lat" style={this.MapBottomTG}> Lat:{this.state.lat.toFixed(8)}</div>
-                                <div id="lng" style={this.MapBottomTG}> lng:{this.state.lng.toFixed(8)}</div>
-                                <div id="Altitude" style={this.MapBottomTG}> Altitude: 0.00m</div>
+                                <div id="lat"> Lat:{this.state.lat.toFixed(8)}</div>
+                                <div id="lng"> lng:{this.state.lng.toFixed(8)}</div>
+                                <div id="Altitude"> Altitude: 0.00m</div>
                             </div>
                         </div>
                     </div>
@@ -349,19 +298,6 @@ export module MainPageUI {
     }
 
     class VideoShowArea extends React.Component<VideoShowAreaProps, VideoShowAreaState> {
-        VideoShowAreaCSS: React.CSSProperties = {
-            display: "flex",
-            position: "absolute",
-            width: '-webkit-calc(50% - 9px)',
-            height: '100%',
-            marginLeft: "3px",
-            left: "50%",
-            border: "3px solid #d89cf6",
-            backgroundColor: "black",
-            justifyContent: "center",
-            alignItems: "center"
-        }
-
         constructor(props) {
             super(props);
             this.MJPEGServerINIT();
@@ -376,7 +312,7 @@ export module MainPageUI {
         public render() {
             return (
                 <>
-                    <div id="VideoShowArea" style={this.VideoShowAreaCSS}>
+                    <div id="VideoShowArea">
                         <img id="VideoShow" onError={this.MJPEGServerOnError} src={this.state.IMGSRC}></img>
                     </div>
                 </>
@@ -429,34 +365,10 @@ export module MainPageUI {
         private GryoYaw: number;
         private GryoRoll: number;
         private GryoPitch: number;
+        private ShowDevID: number = 0;
         private DataUpdateTimer: NodeJS.Timeout;
         private ChartResizeTimer: NodeJS.Timeout;
         private Gryochart: EchartShowSys;
-        private SensorChartArea: React.CSSProperties = {
-            position: "absolute",
-            top: "15px",
-            left: "50%",
-            height: "300px",
-            width: "98%",
-            border: "3px solid #916dd5",
-            borderRadius: "10px",
-            transform: "translate(-50%,0)"
-        }
-        private SensorRTChartCSS: React.CSSProperties = {
-            top: "50%",
-            left: "200px",
-            transform: "translate(0,-50%)",
-            height: "250px",
-            width: "-webkit-calc(100% - 400px)"
-        };
-        private SensorDataCSS: React.CSSProperties = {
-            position: "absolute",
-            top: "0",
-            left: "0",
-            width: "189px",
-            height: "300px",
-            backgroundColor: "gray"
-        }
 
         constructor(props) {
             super(props);
@@ -464,12 +376,11 @@ export module MainPageUI {
             this.state = { DataUpdateFreq: 100, DataSource: "Gryo", DataPitch: 0, DataRoll: 0, DataYaw: 0 }
         }
 
-
         public render() {
             return (
                 <>
-                    <div id="SensorChartArea" style={this.SensorChartArea}>
-                        <div id="SensorDataShow" style={this.SensorDataCSS}>
+                    <div id="SensorChartArea">
+                        <div id="SensorDataShow">
                             <div id="SensorDataShowType" style={{ position: "absolute", top: "50px" }}>
                                 <div style={{ position: "absolute", left: "5px", top: "15px", width: "175px", height: "20px" }}>
                                     <div style={{ position: "absolute", fontSize: "12px", textAlign: "center" }}>DataSource:</div>
@@ -477,6 +388,7 @@ export module MainPageUI {
                                         <option value="Gryo">Gryo</option>
                                         <option value="Accel">Accel</option>
                                         <option value="RealAngle">RealAngle</option>
+                                        <option value="Altitude">Altitude</option>
                                     </select>
                                 </div>
                                 <div style={{ position: "absolute", left: "5px", top: "50px", width: "175px", height: "20px" }}>
@@ -493,7 +405,7 @@ export module MainPageUI {
                                 </div>
                             </div>
                         </div>
-                        <div id='SensorRTChart' style={this.SensorRTChartCSS}></div>
+                        <div id='SensorRTChart'></div>
                     </div>
                 </>
             );
@@ -506,6 +418,8 @@ export module MainPageUI {
                 this.setState({ DataSource: event.target.value });
             } else if (event.target.value == "RealAngle") {
                 this.setState({ DataSource: event.target.value });
+            } else if (event.target.value == "Altitude") {
+                this.setState({ DataSource: event.target.value });
             }
         }
 
@@ -513,17 +427,19 @@ export module MainPageUI {
             this.SensorRTChartInit();
             this.DataUpdateTimer = setInterval(() => {
                 if (this.state.DataSource == "Gryo") {
-                    this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[1][2]), this.GryoPitch);
-                    this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[1][3]), this.GryoRoll);
-                    this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[1][4]), this.GryoYaw);
+                    this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[this.ShowDevID][2]), this.GryoPitch);
+                    this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[this.ShowDevID][3]), this.GryoRoll);
+                    this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[this.ShowDevID][4]), this.GryoYaw);
                     this.setState({
-                        DataYaw: Number(server.deviceRTDataBuffer[1][4]),
-                        DataRoll: Number(server.deviceRTDataBuffer[1][3]),
-                        DataPitch: Number(server.deviceRTDataBuffer[1][2])
+                        DataYaw: Number(server.deviceRTDataBuffer[this.ShowDevID][4]),
+                        DataRoll: Number(server.deviceRTDataBuffer[this.ShowDevID][3]),
+                        DataPitch: Number(server.deviceRTDataBuffer[this.ShowDevID][2])
                     });
                 } else if (this.state.DataSource == "Accel") {
 
                 } else if (this.state.DataSource == "RealAngle") {
+
+                } else if (this.state.DataSource == "Altitude") {
 
                 }
             }, this.state.DataUpdateFreq);

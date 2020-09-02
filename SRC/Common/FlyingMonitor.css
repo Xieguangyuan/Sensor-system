@@ -1,0 +1,70 @@
+#MapVideoArea {
+    position: absolute;
+    width: 100%;
+    height: 65%;
+}
+
+
+#MapArea {
+    position: absolute;
+    height: 100%;
+    width: 50%;
+    left: 0px;
+    border: 3px solid #d89cf6;
+}
+
+#Map {
+    height: -webkit-calc(100% - 23px);
+    width: -webkit-calc(100% - 47px);
+    top: 0;
+    left: 0;
+}
+
+#MapRight {
+    position: absolute;
+    width: 45px;
+    height: -webkit-calc(100% - 20px);
+    background-color: #3e206d;
+    right: 0;
+    top: 0;
+    border: 1px solid white;
+}
+
+#MapRight #con input {
+    -webkit-appearance: slider-vertical;
+    width: 38px;
+    height: 100%;
+}
+
+
+#MapBottom {
+    position: absolute;
+    width: 100%;
+    height: 20px;
+    bottom: 0px;
+    background-color: #3e206d;
+    border: 1px solid white;
+}
+
+#MapBottomTG #lat,
+#MapBottomTG #lng,
+#MapBottomTG #Altitude {
+    padding-left: 10px;
+    display: inline-block;
+    color: white;
+    font-size: 10px;
+}
+
+
+#VideoShowArea {
+    display: flex;
+    position: absolute;
+    width: -webkit-calc(50% - 9px);
+    height: 100%;
+    margin-left: 3px;
+    left: 50%;
+    border: 3px solid #d89cf6;
+    background-color: black;
+    justify-content: center;
+    align-items: center;
+}
