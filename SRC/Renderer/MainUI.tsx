@@ -374,15 +374,21 @@ export module MainPageUI {
         private GryoYaw: number;
         private GryoRoll: number;
         private GryoPitch: number;
+        private AccelRoll: number;
+        private AccelPitch: number;
+        private RealPitch: number;
+        private RealRoll: number;
         private ShowDevID: number = 0;
         private DataUpdateTimer: NodeJS.Timeout;
         private ChartResizeMon: ResizeObserver;
-        private Gryochart: EchartShowSys;
+        private GryoChart: EchartShowSys;
+        private AccelChart: EchartShowSys;
+        private RealChart: EchartShowSys;
 
         constructor(props) {
             super(props);
             this.HandleDataShowType = this.HandleDataShowType.bind(this);
-            this.state = { DataUpdateFreq: 100, DataSource: "Gryo", DataPitch: 0, DataRoll: 0, DataYaw: 0 }
+            this.state = { DataUpdateFreq: 50, DataSource: "Gryo", DataPitch: 0, DataRoll: 0, DataYaw: 0 }
         }
 
         public render() {
@@ -406,11 +412,11 @@ export module MainPageUI {
                                 </div>
                                 <div style={{ position: "absolute", left: "5px", top: "85px", width: "175px", height: "20px" }}>
                                     <div style={{ position: "absolute", fontSize: "12px", textAlign: "center" }}> Roll : </div>
-                                    <div style={{ position: "absolute", right: "0", width: "100px", height: "20px", backgroundColor: "pink", borderRadius: "5px" }}>{this.state.DataPitch}</div>
+                                    <div style={{ position: "absolute", right: "0", width: "100px", height: "20px", backgroundColor: "pink", borderRadius: "5px" }}>{this.state.DataRoll}</div>
                                 </div>
                                 <div style={{ position: "absolute", left: "5px", top: "120px", width: "175px", height: "20px" }}>
                                     <div style={{ position: "absolute", fontSize: "12px", textAlign: "center" }}> Yaw  : </div>
-                                    <div style={{ position: "absolute", right: "0", width: "100px", height: "20px", backgroundColor: "pink", borderRadius: "5px" }}>{this.state.DataPitch}</div>
+                                    <div style={{ position: "absolute", right: "0", width: "100px", height: "20px", backgroundColor: "pink", borderRadius: "5px" }}>{this.state.DataYaw}</div>
                                 </div>
                             </div>
                         </div>
@@ -433,28 +439,42 @@ export module MainPageUI {
         }
 
         componentDidMount() {
-            this.SensorRTChartInit();
+            this.SensorRTChartGryoInit();
+            this.SensorRTChartAccelInit();
+            this.SensorRTChartRealInit();
             this.DataUpdateTimer = setInterval(() => {
                 this.ShowDevID = deviceSelected;
                 if (this.state.DataSource == "Gryo") {
-                    this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[this.ShowDevID][2]), this.GryoPitch);
-                    this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[this.ShowDevID][3]), this.GryoRoll);
-                    this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[this.ShowDevID][4]), this.GryoYaw);
+                    this.GryoChart.EchartsDataAdd(Number(server.deviceRTDataBuffer[this.ShowDevID][2]), this.GryoPitch);
+                    this.GryoChart.EchartsDataAdd(Number(server.deviceRTDataBuffer[this.ShowDevID][3]), this.GryoRoll);
+                    this.GryoChart.EchartsDataAdd(Number(server.deviceRTDataBuffer[this.ShowDevID][4]), this.GryoYaw);
                     this.setState({
                         DataYaw: Number(server.deviceRTDataBuffer[this.ShowDevID][4]),
                         DataRoll: Number(server.deviceRTDataBuffer[this.ShowDevID][3]),
                         DataPitch: Number(server.deviceRTDataBuffer[this.ShowDevID][2])
                     });
                 } else if (this.state.DataSource == "Accel") {
-
+                    this.AccelChart.EchartsDataAdd(Number(server.deviceRTDataBuffer[this.ShowDevID][5]), this.AccelPitch);
+                    this.AccelChart.EchartsDataAdd(Number(server.deviceRTDataBuffer[this.ShowDevID][6]), this.AccelRoll);
+                    this.setState({
+                        DataYaw: -1,
+                        DataRoll: Number(server.deviceRTDataBuffer[this.ShowDevID][6]),
+                        DataPitch: Number(server.deviceRTDataBuffer[this.ShowDevID][5]),
+                    });
                 } else if (this.state.DataSource == "RealAngle") {
-
+                    this.RealChart.EchartsDataAdd(Number(server.deviceRTDataBuffer[this.ShowDevID][7]), this.RealPitch);
+                    this.RealChart.EchartsDataAdd(Number(server.deviceRTDataBuffer[this.ShowDevID][8]), this.RealRoll);
+                    this.setState({
+                        DataYaw: -1,
+                        DataRoll: Number(server.deviceRTDataBuffer[this.ShowDevID][8]),
+                        DataPitch: Number(server.deviceRTDataBuffer[this.ShowDevID][7]),
+                    });
                 } else if (this.state.DataSource == "Altitude") {
 
                 }
             }, this.state.DataUpdateFreq);
             this.ChartResizeMon = new ResizeObserver(entries => {
-                this.Gryochart.EchartAreaUpdate();
+                this.GryoChart.EchartAreaUpdate();
             })
             this.ChartResizeMon.observe(document.getElementById("SensorChartArea"));
         }
@@ -464,29 +484,64 @@ export module MainPageUI {
             this.ChartResizeMon.unobserve(document.getElementById("SensorChartArea"));
         }
 
-        private SensorRTChartInit() {
-            this.Gryochart = new EchartShowSys(document.getElementById('SensorRTChart'), "Gryo", { ymax: 550, ymin: -550 });
-            this.GryoPitch = this.Gryochart.EhcartSeriesAdd({
+        private SensorRTChartGryoInit() {
+            this.GryoChart = new EchartShowSys(document.getElementById('SensorRTChart'), "Gryo", { ymax: 550, ymin: -550 });
+            this.GryoPitch = this.GryoChart.EhcartSeriesAdd({
                 name: 'Charts',
                 type: 'line',
                 showSymbol: false,
                 hoverAnimation: false,
                 data: new Array(30)
             })
-            this.GryoRoll = this.Gryochart.EhcartSeriesAdd({
+            this.GryoRoll = this.GryoChart.EhcartSeriesAdd({
                 name: 'Charts',
                 type: 'line',
                 showSymbol: false,
                 hoverAnimation: false,
                 data: new Array(30)
             })
-            this.GryoYaw = this.Gryochart.EhcartSeriesAdd({
+            this.GryoYaw = this.GryoChart.EhcartSeriesAdd({
                 name: 'Charts',
                 type: 'line',
                 showSymbol: false,
                 hoverAnimation: false,
                 data: new Array(30)
             })
+        }
+
+        private SensorRTChartAccelInit() {
+            this.AccelChart = new EchartShowSys(document.getElementById('SensorRTChart'), "Accel", { ymax: 90, ymin: -90 });
+            this.AccelPitch = this.AccelChart.EhcartSeriesAdd({
+                name: 'Charts',
+                type: 'line',
+                showSymbol: false,
+                hoverAnimation: false,
+                data: new Array(30)
+            });
+            this.AccelRoll = this.AccelChart.EhcartSeriesAdd({
+                name: 'Charts',
+                type: 'line',
+                showSymbol: false,
+                hoverAnimation: false,
+                data: new Array(30)
+            });
+        }
+        private SensorRTChartRealInit() {
+            this.RealChart = new EchartShowSys(document.getElementById('SensorRTChart'), "RealAngle", { ymax: 90, ymin: -90 });
+            this.RealPitch = this.RealChart.EhcartSeriesAdd({
+                name: 'Charts',
+                type: 'line',
+                showSymbol: false,
+                hoverAnimation: false,
+                data: new Array(30)
+            });
+            this.RealRoll = this.RealChart.EhcartSeriesAdd({
+                name: 'Charts',
+                type: 'line',
+                showSymbol: false,
+                hoverAnimation: false,
+                data: new Array(30)
+            });
         }
     }
 
