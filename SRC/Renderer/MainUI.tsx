@@ -5,13 +5,16 @@ import * as ps from 'child_process'
 import { MapShow } from './MapShow'
 import { EchartShowSys } from './EchartsShow'
 import { NetServerMain } from './SocketComu'
+import { ResizeObserver } from 'resize-observer'
 import '../Common/FlyingMonitor.css'
 import '../Common/DroneStatus.css'
-import NoSignal from '../Common/IMG/no-signal.jpg';
+import NoSignal from '../Common/IMG/no-signal.jpg'
 
 export module MainPageUI {
     let JSONConfig: any;
     let server: NetServerMain;
+    let deviceSelected: number = 0;
+    let deviceList: Array<number>
     export function MainPageSet(): void {
         JSONConfig = JSON.parse(String(fs.readFileSync('ACCSSConfig.json')));
         console.log(JSONConfig.nodeServerIP);
@@ -133,29 +136,30 @@ export module MainPageUI {
 
     interface footTileState {
         DeviceCount: number;
+        deviceSelected: number;
         deviceListIsShow: boolean;
     }
 
     class FootTitle extends React.Component<footTitleProps, footTileState> {
         timerID: NodeJS.Timeout;
-        deviceList: Array<number>;
         deviceListElement: Array<JSX.Element> = new Array<JSX.Element>();
         constructor(props) {
             super(props);
-            this.state = { DeviceCount: 0, deviceListIsShow: false }
+            this.state = { DeviceCount: 0, deviceSelected: null, deviceListIsShow: false }
             this.showDeviceList = this.showDeviceList.bind(this);
+            this.deviceSelect = this.deviceSelect.bind(this);
         }
 
         componentDidMount() {
             this.timerID = setInterval(() => {
                 this.setState({ DeviceCount: server.getUseableID().length });
                 this.deviceListElement = Array<JSX.Element>();
-                this.deviceList = server.getUseableID();
-                for (let index = 0; index < this.deviceList.length; index++) {
+                deviceList = server.getUseableID();
+                for (let index = 0; index < deviceList.length; index++) {
                     this.deviceListElement.push(
                         <li key={index.toString()}>
-                            <a href="#">
-                                <div id="deviceId">DeviceID:  {this.deviceList[index]}<br />
+                            <a href="#" onClick={() => this.deviceSelect(deviceList[index])}>
+                                <div id="deviceId">DeviceID:  {deviceList[index]}<br />
                                     <div id="deviceType">[Unkown]</div>
                                     <i className="fa fa-battery-half" aria-hidden="true"></i>
                                 </div>
@@ -164,6 +168,11 @@ export module MainPageUI {
                     );
                 }
             }, 1000)
+        }
+
+        deviceSelect(device: number) {
+            this.setState({ deviceSelected: device });
+            deviceSelected = this.state.deviceSelected;
         }
 
         showDeviceList() {
@@ -367,7 +376,7 @@ export module MainPageUI {
         private GryoPitch: number;
         private ShowDevID: number = 0;
         private DataUpdateTimer: NodeJS.Timeout;
-        private ChartResizeTimer: NodeJS.Timeout;
+        private ChartResizeMon: ResizeObserver;
         private Gryochart: EchartShowSys;
 
         constructor(props) {
@@ -426,6 +435,7 @@ export module MainPageUI {
         componentDidMount() {
             this.SensorRTChartInit();
             this.DataUpdateTimer = setInterval(() => {
+                this.ShowDevID = deviceSelected;
                 if (this.state.DataSource == "Gryo") {
                     this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[this.ShowDevID][2]), this.GryoPitch);
                     this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[this.ShowDevID][3]), this.GryoRoll);
@@ -443,14 +453,15 @@ export module MainPageUI {
 
                 }
             }, this.state.DataUpdateFreq);
-            this.ChartResizeTimer = setInterval(() => {
+            this.ChartResizeMon = new ResizeObserver(entries => {
                 this.Gryochart.EchartAreaUpdate();
-            }, 100)
+            })
+            this.ChartResizeMon.observe(document.getElementById("SensorChartArea"));
         }
 
         componentWillUnmount() {
             clearInterval(this.DataUpdateTimer);
-            clearInterval(this.ChartResizeTimer);
+            this.ChartResizeMon.unobserve(document.getElementById("SensorChartArea"));
         }
 
         private SensorRTChartInit() {

@@ -4,8 +4,6 @@
   "description": "Autopilot console",
   "main": "/SRC/Script/Comped/main.js",
   "scripts": {
-    "rebuild": "electron-rebuild -w opencv4nodejs",
-    "startdev": "electron-webpack dev",
     "start": "electron-webpack",
     "buildext": ".\\extModule\\ACCSSVideoServer\\build.bat"
   },
@@ -29,8 +27,6 @@
     "@types/node": "^12.12.35",
     "@types/react": "^16.9.34",
     "@types/react-dom": "^16.9.6",
-    "@types/node-sass": "^4.11.1",
-    "node-sass": "^4.14.1",
     "css-loader": "^3.5.3",
     "electron": "^8.2.5",
     "electron-rebuild": "^1.10.1",
@@ -46,6 +42,7 @@
     "font-awesome": "^4.7.0",
     "leaflet": "^1.6.0",
     "react": "^16.13.1",
-    "react-dom": "^16.13.1"
+    "react-dom": "^16.13.1",
+    "resize-observer": "^1.0.0"
   }
 }
