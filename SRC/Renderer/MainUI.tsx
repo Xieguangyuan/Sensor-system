@@ -2,6 +2,7 @@ import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import * as fs from 'fs'
 import * as ps from 'child_process'
+import * as nipplejs from 'nipplejs'
 import { MapShow } from './MapShow'
 import { EchartShowSys } from './EchartsShow'
 import { NetServerMain } from './SocketComu'
@@ -218,6 +219,9 @@ export module MainPageUI {
                         <Map />
                         <VideoShowArea />
                     </div>
+                    <div id="InfoControllArea">
+                        <RCControllerStick />
+                    </div>
                 </>
             );
         }
@@ -355,6 +359,34 @@ export module MainPageUI {
             //windows Only
             ps.spawn("taskkill", ["/F", "/IM", "ACCSSVideoServer.exe"]);
             document.getElementById("VideoShow").setAttribute("src", "");
+        }
+    }
+
+    class RCControllerStick extends React.Component {
+        private JoyStickR: nipplejs.JoystickManager;
+        private JoyStickL: nipplejs.JoystickManager;
+        public render() {
+            return (
+                <>
+                    <div id="JoyStickL"></div>
+                    <div id="JoyStickR"></div>
+                </>
+            )
+        }
+
+        componentDidMount() {
+            this.JoyStickL = nipplejs.create({
+                zone: document.getElementById('JoyStickL'),
+                mode: 'static',
+                position: { left: '50%', top: '50%' },
+                color: 'blue'
+            })
+            this.JoyStickR = nipplejs.create({
+                zone: document.getElementById('JoyStickR'),
+                mode: 'static',
+                position: { left: '50%', top: '50%' },
+                color: 'red'
+            })
         }
     }
 

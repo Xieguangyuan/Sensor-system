@@ -4,7 +4,7 @@
   "description": "Autopilot console",
   "main": "/SRC/Script/Comped/main.js",
   "scripts": {
-    "start": "electron-webpack",
+    "start": "electron-webpack dev",
     "buildext": ".\\extModule\\ACCSSVideoServer\\build.bat"
   },
   "repository": {
@@ -41,6 +41,7 @@
     "echarts": "^4.7.0",
     "font-awesome": "^4.7.0",
     "leaflet": "^1.6.0",
+    "nipplejs": "^0.8.7",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "resize-observer": "^1.0.0"
