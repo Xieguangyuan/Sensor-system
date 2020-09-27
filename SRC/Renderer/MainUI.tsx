@@ -400,6 +400,8 @@ export module MainPageUI {
         DataPitch: number;
         DataRoll: number;
         DataYaw: number;
+        DataAltitude: number;
+        DataClimbeRate: number;
     }
 
     class SensorRTChart extends React.Component<SensorRTChartProps, SensorRTChartState> {
@@ -410,20 +412,54 @@ export module MainPageUI {
         private AccelPitch: number;
         private RealPitch: number;
         private RealRoll: number;
+        private ClimbeRate: number;
         private ShowDevID: number = 0;
         private DataUpdateTimer: NodeJS.Timeout;
         private ChartResizeMon: ResizeObserver;
         private GryoChart: EchartShowSys;
         private AccelChart: EchartShowSys;
         private RealChart: EchartShowSys;
+        private ClimbeRateChart: EchartShowSys;
+        private ShowAreaElement: JSX.Element;
 
         constructor(props) {
             super(props);
             this.HandleDataShowType = this.HandleDataShowType.bind(this);
-            this.state = { DataUpdateFreq: 50, DataSource: "Gryo", DataPitch: 0, DataRoll: 0, DataYaw: 0 }
+            this.state = { DataUpdateFreq: 50, DataSource: "Gryo", DataPitch: 0, DataRoll: 0, DataYaw: 0, DataAltitude: 0, DataClimbeRate: 0 }
         }
 
         public render() {
+            if (this.state.DataSource != "Altitude") {
+                this.ShowAreaElement = (
+                    <>
+                        <div style={{ position: "absolute", left: "5px", top: "50px", width: "175px", height: "20px" }}>
+                            <div style={{ position: "absolute", fontSize: "12px", textAlign: "center" }}> Pitch: </div>
+                            <div style={{ position: "absolute", right: "0", width: "100px", height: "20px", backgroundColor: "pink", borderRadius: "5px" }}>{this.state.DataPitch}</div>
+                        </div>
+                        <div style={{ position: "absolute", left: "5px", top: "85px", width: "175px", height: "20px" }}>
+                            <div style={{ position: "absolute", fontSize: "12px", textAlign: "center" }}> Roll : </div>
+                            <div style={{ position: "absolute", right: "0", width: "100px", height: "20px", backgroundColor: "pink", borderRadius: "5px" }}>{this.state.DataRoll}</div>
+                        </div>
+                        <div style={{ position: "absolute", left: "5px", top: "120px", width: "175px", height: "20px" }}>
+                            <div style={{ position: "absolute", fontSize: "12px", textAlign: "center" }}> Yaw  : </div>
+                            <div style={{ position: "absolute", right: "0", width: "100px", height: "20px", backgroundColor: "pink", borderRadius: "5px" }}>{this.state.DataYaw}</div>
+                        </div>
+                    </>
+                )
+            } else if (this.state.DataSource == "Altitude") {
+                this.ShowAreaElement = (
+                    <>
+                        <div style={{ position: "absolute", left: "5px", top: "50px", width: "175px", height: "20px" }}>
+                            <div style={{ position: "absolute", fontSize: "12px", textAlign: "center" }}> Altitude  : </div>
+                            <div style={{ position: "absolute", right: "0", width: "100px", height: "20px", backgroundColor: "pink", borderRadius: "5px" }}>{this.state.DataAltitude}</div>
+                        </div>
+                        <div style={{ position: "absolute", left: "5px", top: "85px", width: "175px", height: "20px" }}>
+                            <div style={{ position: "absolute", fontSize: "12px", textAlign: "center" }}> ClimbeRata: </div>
+                            <div style={{ position: "absolute", right: "0", width: "100px", height: "20px", backgroundColor: "pink", borderRadius: "5px" }}>{this.state.DataClimbeRate}</div>
+                        </div>
+                    </>
+                );
+            }
             return (
                 <>
                     <div id="SensorChartArea">
@@ -438,18 +474,7 @@ export module MainPageUI {
                                         <option value="Altitude">Altitude</option>
                                     </select>
                                 </div>
-                                <div style={{ position: "absolute", left: "5px", top: "50px", width: "175px", height: "20px" }}>
-                                    <div style={{ position: "absolute", fontSize: "12px", textAlign: "center" }}> Pitch: </div>
-                                    <div style={{ position: "absolute", right: "0", width: "100px", height: "20px", backgroundColor: "pink", borderRadius: "5px" }}>{this.state.DataPitch}</div>
-                                </div>
-                                <div style={{ position: "absolute", left: "5px", top: "85px", width: "175px", height: "20px" }}>
-                                    <div style={{ position: "absolute", fontSize: "12px", textAlign: "center" }}> Roll : </div>
-                                    <div style={{ position: "absolute", right: "0", width: "100px", height: "20px", backgroundColor: "pink", borderRadius: "5px" }}>{this.state.DataRoll}</div>
-                                </div>
-                                <div style={{ position: "absolute", left: "5px", top: "120px", width: "175px", height: "20px" }}>
-                                    <div style={{ position: "absolute", fontSize: "12px", textAlign: "center" }}> Yaw  : </div>
-                                    <div style={{ position: "absolute", right: "0", width: "100px", height: "20px", backgroundColor: "pink", borderRadius: "5px" }}>{this.state.DataYaw}</div>
-                                </div>
+                                {this.ShowAreaElement}
                             </div>
                         </div>
                         <div id='SensorRTChart'></div>
@@ -474,6 +499,7 @@ export module MainPageUI {
             this.SensorRTChartGryoInit();
             this.SensorRTChartAccelInit();
             this.SensorRTChartRealInit();
+            this.SensorRTChartClimbeRateInit();
             this.DataUpdateTimer = setInterval(() => {
                 this.ShowDevID = deviceSelected;
                 if (this.state.DataSource == "Gryo") {
@@ -502,7 +528,11 @@ export module MainPageUI {
                         DataPitch: Number(server.deviceRTDataBuffer[this.ShowDevID][7]),
                     });
                 } else if (this.state.DataSource == "Altitude") {
-
+                    this.ClimbeRateChart.EchartsDataAdd(Number(server.deviceRTDataBuffer[this.ShowDevID][9]), this.ClimbeRate);
+                    this.setState({
+                        DataClimbeRate: Number(server.deviceRTDataBuffer[this.ShowDevID][9]),
+                        DataAltitude: Number(server.deviceRTDataBuffer[this.ShowDevID][10])
+                    })
                 }
             }, this.state.DataUpdateFreq);
             this.ChartResizeMon = new ResizeObserver(entries => {
@@ -574,6 +604,17 @@ export module MainPageUI {
                 hoverAnimation: false,
                 data: new Array(30)
             });
+        }
+
+        private SensorRTChartClimbeRateInit() {
+            this.ClimbeRateChart = new EchartShowSys(document.getElementById('SensorRTChart'), "ClimbeRate", { ymax: 100, ymin: -100 });
+            this.ClimbeRate = this.ClimbeRateChart.EhcartSeriesAdd({
+                name: 'Charts',
+                type: 'line',
+                showSymbol: false,
+                hoverAnimation: false,
+                data: new Array(30)
+            })
         }
     }
 
