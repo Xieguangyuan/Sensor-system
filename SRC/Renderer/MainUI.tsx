@@ -81,6 +81,8 @@ export module MainPageUI {
                 this.setState({ RenaderID: 3 })
             }
         }
+        private ExpandAll(): void {
+        }
 
         public render() {
             if (this.state.RenaderID == 0) {
@@ -120,6 +122,12 @@ export module MainPageUI {
                                     <a href="#" onClick={this.AdvanceSettingRender}>
                                         <i className="fa fa-sliders"></i>
                                         <span id="AdvanceSetting">AdvanceSetting</span>
+                                    </a>
+                                </li>
+                                <li style={{ position: "absolute", bottom: 0 }}>
+                                    <a href="#" onClick={this.ExpandAll}>
+                                        <i id="exp" className="fa fa-window-restore" aria-hidden="true"></i>
+                                        <span id="ExpandAll">ExpandORClose</span>
                                     </a>
                                 </li>
                             </ul>

@@ -13,12 +13,8 @@
     overflow: hidden;
 }
 
-.BarmenuShot:hover {
-    width: 220px;
-}
-
-.BarmenuShot:hover+#MainPageArea {
-    margin-left: 220px !important;
+.BarmenuShot ul{
+    height:100%;
 }
 
 #Barmenu {
