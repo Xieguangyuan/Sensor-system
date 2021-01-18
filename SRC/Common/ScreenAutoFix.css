@@ -50,4 +50,8 @@
     #root {
         height: -webkit-calc(100% - 45px) !important;
     }
+
+    #InfoControllArea {
+        height: -webkit-calc(25% - 7px) !important;
+    }
 }

@@ -2,16 +2,20 @@ import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import * as fs from 'fs'
 import * as ps from 'child_process'
+import * as nipplejs from 'nipplejs'
 import { MapShow } from './MapShow'
 import { EchartShowSys } from './EchartsShow'
 import { NetServerMain } from './SocketComu'
+import { ResizeObserver } from 'resize-observer'
 import '../Common/FlyingMonitor.css'
 import '../Common/DroneStatus.css'
-import NoSignal from '../Common/IMG/no-signal.jpg';
+import NoSignal from '../Common/IMG/no-signal.jpg'
 
 export module MainPageUI {
     let JSONConfig: any;
     let server: NetServerMain;
+    let deviceSelected: number = 0;
+    let deviceList: Array<number>
     export function MainPageSet(): void {
         JSONConfig = JSON.parse(String(fs.readFileSync('ACCSSConfig.json')));
         console.log(JSONConfig.nodeServerIP);
@@ -77,6 +81,8 @@ export module MainPageUI {
                 this.setState({ RenaderID: 3 })
             }
         }
+        private ExpandAll(): void {
+        }
 
         public render() {
             if (this.state.RenaderID == 0) {
@@ -118,6 +124,12 @@ export module MainPageUI {
                                         <span id="AdvanceSetting">AdvanceSetting</span>
                                     </a>
                                 </li>
+                                <li style={{ position: "absolute", bottom: 0 }}>
+                                    <a href="#" onClick={this.ExpandAll}>
+                                        <i id="exp" className="fa fa-window-restore" aria-hidden="true"></i>
+                                        <span id="ExpandAll">ExpandORClose</span>
+                                    </a>
+                                </li>
                             </ul>
                         </div>
                     </div>
@@ -133,29 +145,30 @@ export module MainPageUI {
 
     interface footTileState {
         DeviceCount: number;
+        deviceSelected: number;
         deviceListIsShow: boolean;
     }
 
     class FootTitle extends React.Component<footTitleProps, footTileState> {
         timerID: NodeJS.Timeout;
-        deviceList: Array<number>;
         deviceListElement: Array<JSX.Element> = new Array<JSX.Element>();
         constructor(props) {
             super(props);
-            this.state = { DeviceCount: 0, deviceListIsShow: false }
+            this.state = { DeviceCount: 0, deviceSelected: null, deviceListIsShow: false }
             this.showDeviceList = this.showDeviceList.bind(this);
+            this.deviceSelect = this.deviceSelect.bind(this);
         }
 
         componentDidMount() {
             this.timerID = setInterval(() => {
                 this.setState({ DeviceCount: server.getUseableID().length });
                 this.deviceListElement = Array<JSX.Element>();
-                this.deviceList = server.getUseableID();
-                for (let index = 0; index < this.deviceList.length; index++) {
+                deviceList = server.getUseableID();
+                for (let index = 0; index < deviceList.length; index++) {
                     this.deviceListElement.push(
                         <li key={index.toString()}>
-                            <a href="#">
-                                <div id="deviceId">DeviceID:  {this.deviceList[index]}<br />
+                            <a href="#" onClick={() => this.deviceSelect(deviceList[index])}>
+                                <div id="deviceId">DeviceID:  {deviceList[index]}<br />
                                     <div id="deviceType">[Unkown]</div>
                                     <i className="fa fa-battery-half" aria-hidden="true"></i>
                                 </div>
@@ -164,6 +177,11 @@ export module MainPageUI {
                     );
                 }
             }, 1000)
+        }
+
+        deviceSelect(device: number) {
+            this.setState({ deviceSelected: device });
+            deviceSelected = this.state.deviceSelected;
         }
 
         showDeviceList() {
@@ -208,6 +226,9 @@ export module MainPageUI {
                     <div id="MapVideoArea">
                         <Map />
                         <VideoShowArea />
+                    </div>
+                    <div id="InfoControllArea">
+                        <RCControllerStick />
                     </div>
                 </>
             );
@@ -349,6 +370,34 @@ export module MainPageUI {
         }
     }
 
+    class RCControllerStick extends React.Component {
+        private JoyStickR: nipplejs.JoystickManager;
+        private JoyStickL: nipplejs.JoystickManager;
+        public render() {
+            return (
+                <>
+                    <div id="JoyStickL"></div>
+                    <div id="JoyStickR"></div>
+                </>
+            )
+        }
+
+        componentDidMount() {
+            this.JoyStickL = nipplejs.create({
+                zone: document.getElementById('JoyStickL'),
+                mode: 'static',
+                position: { left: '50%', top: '50%' },
+                color: 'blue'
+            })
+            this.JoyStickR = nipplejs.create({
+                zone: document.getElementById('JoyStickR'),
+                mode: 'static',
+                position: { left: '50%', top: '50%' },
+                color: 'red'
+            })
+        }
+    }
+
     interface SensorRTChartProps {
 
     }
@@ -359,24 +408,66 @@ export module MainPageUI {
         DataPitch: number;
         DataRoll: number;
         DataYaw: number;
+        DataAltitude: number;
+        DataClimbeRate: number;
     }
 
     class SensorRTChart extends React.Component<SensorRTChartProps, SensorRTChartState> {
         private GryoYaw: number;
         private GryoRoll: number;
         private GryoPitch: number;
+        private AccelRoll: number;
+        private AccelPitch: number;
+        private RealPitch: number;
+        private RealRoll: number;
+        private ClimbeRate: number;
         private ShowDevID: number = 0;
         private DataUpdateTimer: NodeJS.Timeout;
-        private ChartResizeTimer: NodeJS.Timeout;
-        private Gryochart: EchartShowSys;
+        private ChartResizeMon: ResizeObserver;
+        private GryoChart: EchartShowSys;
+        private AccelChart: EchartShowSys;
+        private RealChart: EchartShowSys;
+        private ClimbeRateChart: EchartShowSys;
+        private ShowAreaElement: JSX.Element;
 
         constructor(props) {
             super(props);
             this.HandleDataShowType = this.HandleDataShowType.bind(this);
-            this.state = { DataUpdateFreq: 100, DataSource: "Gryo", DataPitch: 0, DataRoll: 0, DataYaw: 0 }
+            this.state = { DataUpdateFreq: 50, DataSource: "Gryo", DataPitch: 0, DataRoll: 0, DataYaw: 0, DataAltitude: 0, DataClimbeRate: 0 }
         }
 
         public render() {
+            if (this.state.DataSource != "Altitude") {
+                this.ShowAreaElement = (
+                    <>
+                        <div style={{ position: "absolute", left: "5px", top: "50px", width: "175px", height: "20px" }}>
+                            <div style={{ position: "absolute", fontSize: "12px", textAlign: "center" }}> Pitch: </div>
+                            <div style={{ position: "absolute", right: "0", width: "100px", height: "20px", backgroundColor: "pink", borderRadius: "5px" }}>{this.state.DataPitch}</div>
+                        </div>
+                        <div style={{ position: "absolute", left: "5px", top: "85px", width: "175px", height: "20px" }}>
+                            <div style={{ position: "absolute", fontSize: "12px", textAlign: "center" }}> Roll : </div>
+                            <div style={{ position: "absolute", right: "0", width: "100px", height: "20px", backgroundColor: "pink", borderRadius: "5px" }}>{this.state.DataRoll}</div>
+                        </div>
+                        <div style={{ position: "absolute", left: "5px", top: "120px", width: "175px", height: "20px" }}>
+                            <div style={{ position: "absolute", fontSize: "12px", textAlign: "center" }}> Yaw  : </div>
+                            <div style={{ position: "absolute", right: "0", width: "100px", height: "20px", backgroundColor: "pink", borderRadius: "5px" }}>{this.state.DataYaw}</div>
+                        </div>
+                    </>
+                )
+            } else if (this.state.DataSource == "Altitude") {
+                this.ShowAreaElement = (
+                    <>
+                        <div style={{ position: "absolute", left: "5px", top: "50px", width: "175px", height: "20px" }}>
+                            <div style={{ position: "absolute", fontSize: "12px", textAlign: "center" }}> Altitude  : </div>
+                            <div style={{ position: "absolute", right: "0", width: "100px", height: "20px", backgroundColor: "pink", borderRadius: "5px" }}>{this.state.DataAltitude}</div>
+                        </div>
+                        <div style={{ position: "absolute", left: "5px", top: "85px", width: "175px", height: "20px" }}>
+                            <div style={{ position: "absolute", fontSize: "12px", textAlign: "center" }}> ClimbeRata: </div>
+                            <div style={{ position: "absolute", right: "0", width: "100px", height: "20px", backgroundColor: "pink", borderRadius: "5px" }}>{this.state.DataClimbeRate}</div>
+                        </div>
+                    </>
+                );
+            }
             return (
                 <>
                     <div id="SensorChartArea">
@@ -391,18 +482,7 @@ export module MainPageUI {
                                         <option value="Altitude">Altitude</option>
                                     </select>
                                 </div>
-                                <div style={{ position: "absolute", left: "5px", top: "50px", width: "175px", height: "20px" }}>
-                                    <div style={{ position: "absolute", fontSize: "12px", textAlign: "center" }}> Pitch: </div>
-                                    <div style={{ position: "absolute", right: "0", width: "100px", height: "20px", backgroundColor: "pink", borderRadius: "5px" }}>{this.state.DataPitch}</div>
-                                </div>
-                                <div style={{ position: "absolute", left: "5px", top: "85px", width: "175px", height: "20px" }}>
-                                    <div style={{ position: "absolute", fontSize: "12px", textAlign: "center" }}> Roll : </div>
-                                    <div style={{ position: "absolute", right: "0", width: "100px", height: "20px", backgroundColor: "pink", borderRadius: "5px" }}>{this.state.DataPitch}</div>
-                                </div>
-                                <div style={{ position: "absolute", left: "5px", top: "120px", width: "175px", height: "20px" }}>
-                                    <div style={{ position: "absolute", fontSize: "12px", textAlign: "center" }}> Yaw  : </div>
-                                    <div style={{ position: "absolute", right: "0", width: "100px", height: "20px", backgroundColor: "pink", borderRadius: "5px" }}>{this.state.DataPitch}</div>
-                                </div>
+                                {this.ShowAreaElement}
                             </div>
                         </div>
                         <div id='SensorRTChart'></div>
@@ -424,52 +504,119 @@ export module MainPageUI {
         }
 
         componentDidMount() {
-            this.SensorRTChartInit();
+            this.SensorRTChartGryoInit();
+            this.SensorRTChartAccelInit();
+            this.SensorRTChartRealInit();
+            this.SensorRTChartClimbeRateInit();
             this.DataUpdateTimer = setInterval(() => {
+                this.ShowDevID = deviceSelected;
                 if (this.state.DataSource == "Gryo") {
-                    this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[this.ShowDevID][2]), this.GryoPitch);
-                    this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[this.ShowDevID][3]), this.GryoRoll);
-                    this.Gryochart.EchartsDataAdd(Number(server.deviceRTDataBuffer[this.ShowDevID][4]), this.GryoYaw);
+                    this.GryoChart.EchartsDataAdd(Number(server.deviceRTDataBuffer[this.ShowDevID][2]), this.GryoPitch);
+                    this.GryoChart.EchartsDataAdd(Number(server.deviceRTDataBuffer[this.ShowDevID][3]), this.GryoRoll);
+                    this.GryoChart.EchartsDataAdd(Number(server.deviceRTDataBuffer[this.ShowDevID][4]), this.GryoYaw);
                     this.setState({
                         DataYaw: Number(server.deviceRTDataBuffer[this.ShowDevID][4]),
                         DataRoll: Number(server.deviceRTDataBuffer[this.ShowDevID][3]),
                         DataPitch: Number(server.deviceRTDataBuffer[this.ShowDevID][2])
                     });
                 } else if (this.state.DataSource == "Accel") {
-
+                    this.AccelChart.EchartsDataAdd(Number(server.deviceRTDataBuffer[this.ShowDevID][5]), this.AccelPitch);
+                    this.AccelChart.EchartsDataAdd(Number(server.deviceRTDataBuffer[this.ShowDevID][6]), this.AccelRoll);
+                    this.setState({
+                        DataYaw: -1,
+                        DataRoll: Number(server.deviceRTDataBuffer[this.ShowDevID][6]),
+                        DataPitch: Number(server.deviceRTDataBuffer[this.ShowDevID][5]),
+                    });
                 } else if (this.state.DataSource == "RealAngle") {
-
+                    this.RealChart.EchartsDataAdd(Number(server.deviceRTDataBuffer[this.ShowDevID][7]), this.RealPitch);
+                    this.RealChart.EchartsDataAdd(Number(server.deviceRTDataBuffer[this.ShowDevID][8]), this.RealRoll);
+                    this.setState({
+                        DataYaw: -1,
+                        DataRoll: Number(server.deviceRTDataBuffer[this.ShowDevID][8]),
+                        DataPitch: Number(server.deviceRTDataBuffer[this.ShowDevID][7]),
+                    });
                 } else if (this.state.DataSource == "Altitude") {
-
+                    this.ClimbeRateChart.EchartsDataAdd(Number(server.deviceRTDataBuffer[this.ShowDevID][9]), this.ClimbeRate);
+                    this.setState({
+                        DataClimbeRate: Number(server.deviceRTDataBuffer[this.ShowDevID][9]),
+                        DataAltitude: Number(server.deviceRTDataBuffer[this.ShowDevID][10])
+                    })
                 }
             }, this.state.DataUpdateFreq);
-            this.ChartResizeTimer = setInterval(() => {
-                this.Gryochart.EchartAreaUpdate();
-            }, 100)
+            this.ChartResizeMon = new ResizeObserver(entries => {
+                this.GryoChart.EchartAreaUpdate();
+            })
+            this.ChartResizeMon.observe(document.getElementById("SensorChartArea"));
         }
 
         componentWillUnmount() {
             clearInterval(this.DataUpdateTimer);
-            clearInterval(this.ChartResizeTimer);
+            this.ChartResizeMon.unobserve(document.getElementById("SensorChartArea"));
         }
 
-        private SensorRTChartInit() {
-            this.Gryochart = new EchartShowSys(document.getElementById('SensorRTChart'), "Gryo", { ymax: 550, ymin: -550 });
-            this.GryoPitch = this.Gryochart.EhcartSeriesAdd({
+        private SensorRTChartGryoInit() {
+            this.GryoChart = new EchartShowSys(document.getElementById('SensorRTChart'), "Gryo", { ymax: 550, ymin: -550 });
+            this.GryoPitch = this.GryoChart.EhcartSeriesAdd({
                 name: 'Charts',
                 type: 'line',
                 showSymbol: false,
                 hoverAnimation: false,
                 data: new Array(30)
             })
-            this.GryoRoll = this.Gryochart.EhcartSeriesAdd({
+            this.GryoRoll = this.GryoChart.EhcartSeriesAdd({
                 name: 'Charts',
                 type: 'line',
                 showSymbol: false,
                 hoverAnimation: false,
                 data: new Array(30)
             })
-            this.GryoYaw = this.Gryochart.EhcartSeriesAdd({
+            this.GryoYaw = this.GryoChart.EhcartSeriesAdd({
+                name: 'Charts',
+                type: 'line',
+                showSymbol: false,
+                hoverAnimation: false,
+                data: new Array(30)
+            })
+        }
+
+        private SensorRTChartAccelInit() {
+            this.AccelChart = new EchartShowSys(document.getElementById('SensorRTChart'), "Accel", { ymax: 90, ymin: -90 });
+            this.AccelPitch = this.AccelChart.EhcartSeriesAdd({
+                name: 'Charts',
+                type: 'line',
+                showSymbol: false,
+                hoverAnimation: false,
+                data: new Array(30)
+            });
+            this.AccelRoll = this.AccelChart.EhcartSeriesAdd({
+                name: 'Charts',
+                type: 'line',
+                showSymbol: false,
+                hoverAnimation: false,
+                data: new Array(30)
+            });
+        }
+        private SensorRTChartRealInit() {
+            this.RealChart = new EchartShowSys(document.getElementById('SensorRTChart'), "RealAngle", { ymax: 90, ymin: -90 });
+            this.RealPitch = this.RealChart.EhcartSeriesAdd({
+                name: 'Charts',
+                type: 'line',
+                showSymbol: false,
+                hoverAnimation: false,
+                data: new Array(30)
+            });
+            this.RealRoll = this.RealChart.EhcartSeriesAdd({
+                name: 'Charts',
+                type: 'line',
+                showSymbol: false,
+                hoverAnimation: false,
+                data: new Array(30)
+            });
+        }
+
+        private SensorRTChartClimbeRateInit() {
+            this.ClimbeRateChart = new EchartShowSys(document.getElementById('SensorRTChart'), "ClimbeRate", { ymax: 100, ymin: -100 });
+            this.ClimbeRate = this.ClimbeRateChart.EhcartSeriesAdd({
                 name: 'Charts',
                 type: 'line',
                 showSymbol: false,

@@ -68,3 +68,36 @@
     justify-content: center;
     align-items: center;
 }
+
+/*==========================================================*/
+
+#InfoControllArea {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: -webkit-calc(35% - 7px);
+    background-color: #d89cf6;
+}
+
+/* #ControllerStick {
+    height: 100%;
+    width: -webkit-calc(50% - 9px);
+    right: 0;
+    position: absolute;
+} */
+
+#JoyStickL {
+    position: absolute;
+    display: inline-block;
+    left: 25px;
+    width: 100px;
+    height: 100%;
+}
+
+#JoyStickR {
+    position: absolute;
+    display: inline-block;
+    right: 80px;
+    width: 100px;
+    height: 100%;
+}
